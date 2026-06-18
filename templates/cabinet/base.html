@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ t.cab_title }}{% endblock %} — Menus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script>
+  // HTMX → отправлять CSRF-токен из cookie со всеми не-GET запросами
+  document.addEventListener('htmx:configRequest', function (e) {
+    const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+    if (m) e.detail.headers['X-CSRFToken'] = m.pop();
+  });
+</script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { brand:'#C75B39', sand:'#FBF6EE', ink:'#2A2118', clay:'#E0A04D', forest:'#3E5C4A', line:'#ECE3D5', night:'#241C14', night2:'#312719' },
+    fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'], mono:['JetBrains Mono','monospace'] }
+  } } }
+</script>
+<style>[x-cloak]{display:none!important}</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body class="font-body bg-sand text-ink">
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="w-60 flex-none bg-night text-[#C2B6A2] flex flex-col p-4">
+    <a href="/" class="flex items-center gap-3 px-2 pb-5">
+      <span class="font-display text-2xl font-semibold text-sand">Menus</span>
+    </a>
+
+    <!-- venue -->
+    <div class="bg-night2 border border-[#3D3120] rounded-xl p-2.5 flex items-center gap-2.5 mb-4">
+      <span class="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-display font-semibold flex-none">{{ restaurant.name|first }}</span>
+      <div class="min-w-0">
+        <div class="text-[13px] font-semibold text-sand truncate">{{ restaurant.name }}</div>
+        <div class="text-[11px] text-[#9A8C78] truncate">{{ restaurant.get_type_display }}{% if restaurant.city %} · {{ restaurant.city }}{% endif %}</div>
+      </div>
+    </div>
+
+    {% with base='inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full' %}
+    <nav class="flex flex-col gap-0.5">
+      <a href="{% url 'restaurants:dashboard' restaurant.slug %}" class="{{ base }} {% if active == 'dashboard' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_dashboard }}</a>
+      {% if 'menu' in perms %}
+      <a href="{% url 'menu:menu' restaurant.slug %}" class="{{ base }} {% if active == 'menu' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_menu }}</a>
+      {% endif %}
+      {% if 'orders' in perms %}
+      <a href="{% url 'orders:orders' restaurant.slug %}" class="{{ base }} {% if active == 'orders' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_orders }}</a>
+      {% endif %}
+      {% if 'tables' in perms %}
+      <a href="{% url 'restaurants:tables' restaurant.slug %}" class="{{ base }} {% if active == 'tables' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_tables }}</a>
+      <a href="{% url 'restaurants:qr_sheet' restaurant.slug %}" class="{{ base }} {% if active == 'qr' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_qr }}</a>
+      {% endif %}
+      {% if 'staff' in perms %}
+      <a href="{% url 'restaurants:staff' restaurant.slug %}" class="{{ base }} {% if active == 'staff' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_staff }}</a>
+      {% endif %}
+      <span class="{{ base }} opacity-40 cursor-default">{{ t.nav_analytics }} <span class="ml-auto text-[10px] font-mono">{{ t.soon }}</span></span>
+      <span class="{{ base }} opacity-40 cursor-default">{{ t.nav_settings }} <span class="ml-auto text-[10px] font-mono">{{ t.soon }}</span></span>
+    </nav>
+    {% endwith %}
+
+    <div class="mt-auto flex items-center gap-2.5 pt-4 border-t border-[#3A2F1F]">
+      <span class="w-8 h-8 rounded-full bg-forest text-white flex items-center justify-center text-xs font-semibold flex-none">{{ user.full_name|default:user.phone|slice:":2"|upper }}</span>
+      <div class="min-w-0 flex-1">
+        <div class="text-[13px] font-semibold text-sand truncate">{{ user.full_name|default:user.phone }}</div>
+        {% if role_label %}<div class="text-[11px] text-[#9A8C78] truncate">{{ role_label }}</div>{% endif %}
+      </div>
+      <a href="{% url 'accounts:logout' %}" class="text-[11px] text-[#9A8C78] hover:text-sand">{{ t.cab_logout }}</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 min-w-0 flex flex-col">
+    <header class="h-[72px] flex-none border-b border-line bg-[#FFFCF7] flex items-center gap-4 px-7">
+      <div>
+        <h1 class="font-display text-xl font-semibold leading-none">{% block heading %}{% endblock %}</h1>
+        <div class="text-xs text-ink/50 mt-1">{% block subheading %}{% endblock %}</div>
+      </div>
+      <div class="flex-1"></div>
+      <div class="flex bg-white border border-line rounded-full p-0.5 text-xs font-semibold">
+        {% for code, label in LANGUAGES %}
+        <a href="{% url 'core:set_language' %}?lang={{ code }}&next={{ request.path|urlencode }}"
+           class="px-2.5 py-1 rounded-full {% if code == LANG %}bg-brand text-white{% else %}text-ink/50{% endif %}">{{ label }}</a>
+        {% endfor %}
+      </div>
+      {% block actions %}{% endblock %}
+    </header>
+
+    <main class="flex-1 min-h-0 overflow-auto p-7">
+      {% if messages %}
+        <div class="mb-5 space-y-2">
+          {% for m in messages %}
+          <div class="rounded-xl px-4 py-3 text-sm {% if m.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-forest/10 text-forest border border-forest/20{% endif %}">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.verify_title }} — Menus{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white border border-line rounded-3xl p-8 shadow-sm text-center">
+  <h1 class="font-display text-2xl font-semibold mb-2">{{ t.verify_title }}</h1>
+  <p class="text-sm text-ink/50 mb-6">{{ t.verify_sent }} <span class="font-semibold text-ink">{{ phone }}</span></p>
+  <form method="post" action="{% url 'accounts:verify' %}" class="space-y-4">
+    {% csrf_token %}
+    <input name="code" inputmode="numeric" autocomplete="one-time-code" required
+           class="w-full text-center tracking-[0.5em] text-2xl font-semibold border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand"
+           placeholder="••••">
+    <button class="w-full bg-brand text-white font-semibold rounded-xl py-3.5 hover:opacity-95">{{ t.verify_submit }}</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ restaurant.name }} — {{ table.name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { brand:'#C75B39', sand:'#FBF6EE', ink:'#2A2118' },
+    fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'] }
+  } } }
+</script>
+</head>
+<body class="font-body bg-sand text-ink min-h-screen flex flex-col">
+  <header class="bg-brand text-white px-5 py-4 flex items-center justify-between">
+    <span class="font-display text-lg font-semibold">{{ restaurant.name }}</span>
+    <span class="text-xs bg-white/20 rounded-full px-2.5 py-1">{{ t.stub_table }} {{ table.name }}</span>
+  </header>
+  <main class="flex-1 flex flex-col items-center justify-center text-center px-6 gap-3">
+    <div class="text-5xl">🍽️</div>
+    <h1 class="font-display text-2xl font-semibold">{{ t.stub_soon }}</h1>
+    <p class="text-ink/50 text-sm">{{ restaurant.name }} · {{ table.name }}</p>
+  </main>
+</body>
+</html>

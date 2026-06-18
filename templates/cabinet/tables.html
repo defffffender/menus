@@ -1,0 +1,68 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.tables_title }}{% endblock %}
+{% block subheading %}{{ t.tables_subtitle }}{% endblock %}
+{% block content %}
+<div class="grid lg:grid-cols-3 gap-6 items-start">
+
+  <!-- add / edit form -->
+  <div class="bg-white border border-line rounded-2xl p-5 lg:order-2">
+    <h2 class="font-semibold mb-4">
+      {% if edit_table %}{{ t.tables_edit }}: {{ edit_table.name }}{% else %}{{ t.tables_add }}{% endif %}
+    </h2>
+    <form method="post"
+          action="{% if edit_table %}{% url 'restaurants:table_edit' restaurant.slug edit_table.pk %}{% else %}{% url 'restaurants:tables' restaurant.slug %}{% endif %}"
+          class="space-y-3">
+      {% csrf_token %}
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.tables_name }}</label>
+        <input name="name" required value="{{ form.name.value|default:'' }}"
+               placeholder="{{ t.nav_tables }} 12"
+               class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.tables_seats }}</label>
+        <input name="seats" type="number" min="1" value="{{ form.seats.value|default:'' }}"
+               class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button class="flex-1 bg-brand text-white font-semibold rounded-xl py-2.5">{{ t.tables_save }}</button>
+        {% if edit_table %}
+        <a href="{% url 'restaurants:tables' restaurant.slug %}" class="px-4 py-2.5 rounded-xl border border-line font-semibold">{{ t.tables_cancel }}</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- tables list -->
+  <div class="lg:col-span-2 lg:order-1">
+    {% if tables %}
+    <div class="bg-white border border-line rounded-2xl divide-y divide-line">
+      {% for table in tables %}
+      <div class="flex items-center gap-4 p-4">
+        <img src="{% url 'restaurants:table_qr_png' restaurant.slug table.pk %}" alt="QR"
+             class="w-14 h-14 rounded-lg border border-line flex-none">
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold">{{ table.name }}</div>
+          <div class="text-xs text-ink/50">
+            {% if table.seats %}{{ table.seats }} {{ t.tables_seats|lower }} · {% endif %}
+            <span class="font-mono">{{ table.qr_token|slice:":8" }}</span>
+          </div>
+        </div>
+        <a href="{% url 'restaurants:table_qr_png' restaurant.slug table.pk %}" target="_blank"
+           class="text-xs font-semibold text-ink/60 hover:text-brand">{{ t.tables_qr }}</a>
+        <a href="{% url 'restaurants:table_edit' restaurant.slug table.pk %}"
+           class="text-xs font-semibold text-ink/60 hover:text-brand">{{ t.tables_edit }}</a>
+        <form method="post" action="{% url 'restaurants:table_delete' restaurant.slug table.pk %}"
+              onsubmit="return confirm('{{ t.tables_delete_confirm }}')">
+          {% csrf_token %}
+          <button class="text-xs font-semibold text-red-500 hover:text-red-700">{{ t.tables_delete }}</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white border border-line rounded-2xl p-10 text-center text-ink/50">{{ t.tables_empty }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

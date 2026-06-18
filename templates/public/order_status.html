@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ t.ost_title }} — {{ restaurant.name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { brand:'#C75B39', sand:'#FBF6EE', ink:'#2A2118', clay:'#E0A04D', forest:'#3E5C4A', line:'#ECE3D5' },
+    fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'] }
+  } } }
+</script>
+</head>
+<body class="font-body bg-sand text-ink min-h-screen">
+  <header class="bg-brand text-white px-5 py-4 flex items-center justify-between">
+    <span class="font-display text-lg font-semibold truncate">{{ restaurant.name }}</span>
+    {% if table %}<span class="text-xs bg-white/20 rounded-full px-3 py-1 flex-none">{{ t.ost_number }} № {{ order.pk }}</span>{% endif %}
+  </header>
+
+  <main class="px-4 py-6 max-w-md mx-auto">
+    <div class="text-center mb-6">
+      <div class="text-4xl mb-2">✅</div>
+      <h1 class="font-display text-2xl font-semibold">{{ t.ost_title }}</h1>
+      <p class="text-ink/50 text-sm mt-1">{{ t.ost_number }} № {{ order.pk }}{% if table %} · {{ t.pub_table }} {{ table.name }}{% endif %}</p>
+    </div>
+
+    <div class="bg-white border border-line rounded-2xl p-5 mb-4">
+      {% include 'public/_order_status.html' %}
+
+      <div class="border-t border-line pt-3 space-y-1.5">
+        {% for item in order.items.all %}
+        <div class="flex justify-between gap-2 text-sm">
+          <span class="min-w-0">{{ item.name }} <span class="text-ink/40">×{{ item.quantity }}</span></span>
+          <span class="tabular-nums text-ink/60 flex-none">{{ item.line_total }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if order.comment %}
+      <div class="mt-3 text-xs bg-sand rounded-lg px-3 py-2 text-ink/70">{{ t.ost_comment }}: {{ order.comment }}</div>
+      {% endif %}
+
+      <div class="border-t border-line mt-3 pt-3 flex items-center justify-between">
+        <span class="font-semibold">{{ t.ost_total }}</span>
+        <span class="font-display text-xl font-semibold tabular-nums">{{ order.total }} <span class="text-xs text-ink/40 font-normal">{{ t.ost_som }}</span></span>
+      </div>
+    </div>
+
+    {% if table %}
+    <a href="{% url 'restaurants:guest_menu' table.qr_token %}"
+       class="block text-center bg-white border border-line rounded-2xl py-3.5 font-semibold hover:border-brand">{{ t.ost_new_order }}</a>
+    {% endif %}
+  </main>
+</body>
+</html>

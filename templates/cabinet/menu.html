@@ -1,0 +1,121 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.menu_title }}{% endblock %}
+{% block subheading %}{{ t.menu_subtitle }}{% endblock %}
+{% block actions %}
+<div class="flex items-center gap-2" x-data>
+  <button @click="$dispatch('toggle-cat')"
+          class="text-sm font-semibold px-4 py-2.5 rounded-xl border border-line bg-white hover:border-brand">
+    + {{ t.menu_categories }}
+  </button>
+  {% if categories %}
+  <a href="{% url 'menu:dish_add' restaurant.slug %}"
+     class="bg-brand text-white text-sm font-semibold px-4 py-2.5 rounded-xl">{{ t.menu_add_dish }}</a>
+  {% endif %}
+</div>
+{% endblock %}
+{% block content %}
+<div x-data="{ catOpen: false, editId: null }" @toggle-cat.window="catOpen = !catOpen">
+
+  <!-- add category -->
+  <div x-show="catOpen" x-cloak class="bg-white border border-line rounded-2xl p-5 mb-6">
+    <h2 class="font-semibold mb-3">{{ t.menu_add_category }}</h2>
+    <form method="post" action="{% url 'menu:category_add' restaurant.slug %}"
+          class="grid sm:grid-cols-4 gap-3 items-end">
+      {% csrf_token %}
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">RU</label>
+        <input name="name_ru" required placeholder="Горячие блюда"
+               class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">UZ</label>
+        <input name="name_uz" placeholder="Issiq taomlar"
+               class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">EN</label>
+        <input name="name_en" placeholder="Hot dishes"
+               class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+      <button class="bg-brand text-white font-semibold rounded-xl py-2.5">{{ t.menu_save }}</button>
+    </form>
+  </div>
+
+  {% if categories %}
+    <div class="space-y-7">
+    {% for category in categories %}
+      <section>
+        <!-- category header -->
+        <div class="flex items-center gap-3 mb-3">
+          <h2 class="font-display text-lg font-semibold">{{ category.name_ru }}</h2>
+          <span class="text-xs text-ink/40">{{ category.dishes.count }}</span>
+          <div class="flex-1"></div>
+          <button @click="editId = (editId === {{ category.pk }} ? null : {{ category.pk }})"
+                  class="text-xs font-semibold text-ink/50 hover:text-brand">{{ t.menu_edit }}</button>
+          <form method="post" action="{% url 'menu:category_delete' restaurant.slug category.pk %}"
+                onsubmit="return confirm('{{ t.cat_delete_confirm }}')">
+            {% csrf_token %}
+            <button class="text-xs font-semibold text-red-500 hover:text-red-700">{{ t.menu_delete }}</button>
+          </form>
+        </div>
+
+        <!-- inline category edit -->
+        <div x-show="editId === {{ category.pk }}" x-cloak class="bg-white border border-line rounded-2xl p-4 mb-3">
+          <form method="post" action="{% url 'menu:category_edit' restaurant.slug category.pk %}"
+                class="grid sm:grid-cols-4 gap-3 items-end">
+            {% csrf_token %}
+            <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">RU</label>
+              <input name="name_ru" required value="{{ category.name_ru }}" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+            <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">UZ</label>
+              <input name="name_uz" value="{{ category.name_uz }}" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+            <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">EN</label>
+              <input name="name_en" value="{{ category.name_en }}" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+            <button class="bg-brand text-white font-semibold rounded-xl py-2.5">{{ t.menu_save }}</button>
+          </form>
+        </div>
+
+        <!-- dishes -->
+        {% if category.dishes.all %}
+        <div class="bg-white border border-line rounded-2xl divide-y divide-line">
+          {% for dish in category.dishes.all %}
+          <div class="flex items-center gap-4 p-4">
+            <img src="{{ dish.photo.url }}" alt="" class="w-14 h-14 rounded-xl object-cover flex-none border border-line">
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">{{ dish.name_ru }}</div>
+              <div class="text-xs text-ink/50 truncate">
+                {{ dish.name_uz|default:dish.name_en }}{% if dish.weight %} · {{ dish.weight }}{% endif %}
+              </div>
+            </div>
+            <div class="text-right flex-none">
+              <div class="font-semibold tabular-nums">
+                {% if dish.has_variants %}<span class="text-xs text-ink/40 font-normal">{{ t.menu_from }} </span>{% endif %}{{ dish.min_price }}
+                <span class="text-xs text-ink/40 font-normal">{{ t.menu_som }}</span>
+              </div>
+            </div>
+            <form method="post" action="{% url 'menu:dish_toggle' restaurant.slug dish.pk %}" class="flex-none">
+              {% csrf_token %}
+              <button class="text-[11px] font-semibold px-2.5 py-1 rounded-full {% if dish.is_available %}bg-forest/10 text-forest{% else %}bg-red-100 text-red-600{% endif %}">
+                {% if dish.is_available %}{{ t.menu_in_stock }}{% else %}{{ t.menu_stop }}{% endif %}
+              </button>
+            </form>
+            <a href="{% url 'menu:dish_edit' restaurant.slug dish.pk %}"
+               class="text-xs font-semibold text-ink/60 hover:text-brand flex-none">{{ t.menu_edit }}</a>
+            <form method="post" action="{% url 'menu:dish_delete' restaurant.slug dish.pk %}" class="flex-none"
+                  onsubmit="return confirm('{{ t.dish_delete_confirm }}')">
+              {% csrf_token %}
+              <button class="text-xs font-semibold text-red-500 hover:text-red-700">{{ t.menu_delete }}</button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-sm text-ink/40 px-1">{{ t.menu_no_dishes }}</div>
+        {% endif %}
+      </section>
+    {% endfor %}
+    </div>
+  {% else %}
+    <div class="bg-white border border-line rounded-2xl p-12 text-center text-ink/50">{{ t.menu_empty }}</div>
+  {% endif %}
+</div>
+{% endblock %}

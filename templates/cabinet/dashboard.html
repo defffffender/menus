@@ -1,0 +1,33 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.dash_title }}{% endblock %}
+{% block subheading %}{{ restaurant.name }}{% endblock %}
+{% block content %}
+<div class="grid sm:grid-cols-3 gap-4 max-w-3xl">
+  {% if 'orders' in perms %}
+  <a href="{% url 'orders:orders' restaurant.slug %}" class="bg-white border border-line rounded-2xl p-5 hover:border-brand transition {% if active_orders %}ring-2 ring-brand/30{% endif %}">
+    <div class="text-xs text-ink/50">{{ t.ord_title }}</div>
+    <div class="text-3xl font-bold mt-1 tabular-nums">{{ active_orders }}</div>
+    <div class="text-xs text-brand font-semibold mt-2">{{ t.ord_active }} →</div>
+  </a>
+  {% endif %}
+  {% if 'tables' in perms %}
+  <a href="{% url 'restaurants:tables' restaurant.slug %}" class="bg-white border border-line rounded-2xl p-5 hover:border-brand transition">
+    <div class="text-xs text-ink/50">{{ t.dash_tables }}</div>
+    <div class="text-3xl font-bold mt-1 tabular-nums">{{ tables_count }}</div>
+    <div class="text-xs text-brand font-semibold mt-2">{{ t.nav_tables }} →</div>
+  </a>
+  <a href="{% url 'restaurants:qr_sheet' restaurant.slug %}" class="bg-white border border-line rounded-2xl p-5 hover:border-brand transition">
+    <div class="text-xs text-ink/50">{{ t.nav_qr }}</div>
+    <div class="text-3xl font-bold mt-1">QR</div>
+    <div class="text-xs text-brand font-semibold mt-2">{{ t.qr_print }} →</div>
+  </a>
+  {% endif %}
+  {% if 'menu' in perms %}
+  <a href="{% url 'menu:menu' restaurant.slug %}" class="bg-white border border-line rounded-2xl p-5 hover:border-brand transition">
+    <div class="text-xs text-ink/50">{{ t.nav_menu }}</div>
+    <div class="text-3xl font-bold mt-1 tabular-nums">{{ dishes_count }}</div>
+    <div class="text-xs text-brand font-semibold mt-2">{{ t.dash_manage_menu }} →</div>
+  </a>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menus — QR-меню и приём заказов для общепита Узбекистана</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700&family=Golos+Text:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#FBF6EE;font-family:'Golos Text',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#2A2118}
+  ::selection{background:#E0A04D;color:#2A2118}
+  a{text-decoration:none;color:inherit}
+</style>
+</head>
+<body>
+
+<div style="background:#FBF6EE;">
+
+  <!-- ===== NAV ===== -->
+  <div style="position:sticky;top:0;z-index:50;background:rgba(251,246,238,.86);backdrop-filter:blur(10px);border-bottom:1px solid #ECE3D5;">
+    <div style="max-width:1180px;margin:0 auto;height:70px;display:flex;align-items:center;gap:30px;padding:0 28px;">
+      <div style="display:flex;align-items:center;gap:11px;">
+        <div style="width:34px;height:34px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:2.5px;flex:none;">
+          <div style="background:#C75B39;border-radius:2px;"></div><div style="background:#E3D6C2;border-radius:2px;"></div><div style="background:#C75B39;border-radius:2px;"></div>
+          <div style="background:#E3D6C2;border-radius:2px;"></div>
+          <div style="position:relative;"><div style="position:absolute;inset:0;background:#C75B39;border-radius:1.5px;"></div><div style="position:absolute;inset:0;background:#C75B39;border-radius:1.5px;transform:rotate(45deg);"></div></div>
+          <div style="background:#E3D6C2;border-radius:2px;"></div>
+          <div style="background:#C75B39;border-radius:2px;"></div><div style="background:#E3D6C2;border-radius:2px;"></div><div style="background:#C75B39;border-radius:2px;"></div>
+        </div>
+        <span style="font-family:'Spectral',serif;font-size:24px;font-weight:600;letter-spacing:-0.01em;">Menus</span>
+      </div>
+      <div style="display:flex;gap:26px;margin-left:14px;font-size:14px;color:#6B5E4F;font-weight:500;">
+        <a href="#features" style="cursor:pointer;">Возможности</a>
+        <a href="#how" style="cursor:pointer;">Как работает</a>
+        <a href="#pricing" style="cursor:pointer;">Цены</a>
+        <a href="#register" style="cursor:pointer;">Вопросы</a>
+      </div>
+      <div style="flex:1;"></div>
+      <div style="display:flex;background:#fff;border:1px solid #ECE3D5;border-radius:999px;padding:3px;gap:1px;">
+        <span style="padding:5px 11px;border-radius:999px;background:#C75B39;color:#fff;font-size:12px;font-weight:700;">RU</span>
+        <span style="padding:5px 10px;border-radius:999px;color:#8A7C68;font-size:12px;font-weight:600;">UZ</span>
+        <span style="padding:5px 10px;border-radius:999px;color:#8A7C68;font-size:12px;font-weight:600;">EN</span>
+      </div>
+      <a href="/login/" style="font-size:14px;font-weight:600;color:#2A2118;cursor:pointer;">Войти</a>
+      <a href="/register/" style="background:#C75B39;color:#fff;font-size:14px;font-weight:600;padding:10px 18px;border-radius:11px;cursor:pointer;box-shadow:0 4px 12px rgba(199,91,57,.22);">Начать бесплатно</a>
+    </div>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <div style="position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background-image:radial-gradient(#ECE0CD 1.4px,transparent 1.4px);background-size:22px 22px;opacity:.6;"></div>
+    <div style="position:absolute;top:-120px;right:-80px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(224,160,77,.20),transparent 70%);"></div>
+    <div style="position:relative;max-width:1180px;margin:0 auto;padding:72px 28px 80px;display:grid;grid-template-columns:1.05fr 0.95fr;gap:56px;align-items:center;">
+      <!-- left -->
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #ECE3D5;border-radius:999px;padding:7px 14px;font-size:13px;color:#6B5E4F;font-weight:500;">
+          <span style="width:7px;height:7px;border-radius:50%;background:#3E5C4A;"></span>QR-меню для общепита Узбекистана
+        </div>
+        <h1 style="font-family:'Spectral',serif;font-size:58px;font-weight:600;line-height:1.04;letter-spacing:-0.02em;margin:22px 0 0;">Меню, которое<br>гость открывает<br><span style="color:#C75B39;">за один скан</span></h1>
+        <p style="font-size:18px;line-height:1.6;color:#6B5E4F;margin:22px 0 0;max-width:480px;">Гость наводит камеру на QR на столе — и заказывает сам, на родном языке. Вы управляете меню и заказами из одного кабинета. Без приложений и регистрации гостя.</p>
+        <div style="display:flex;gap:14px;margin-top:32px;align-items:center;">
+          <a href="/register/" style="background:#C75B39;color:#fff;font-size:16px;font-weight:600;padding:15px 26px;border-radius:13px;cursor:pointer;box-shadow:0 8px 20px rgba(199,91,57,.26);">Подключить заведение</a>
+          <span style="background:#fff;border:1px solid #E3D6C2;color:#2A2118;font-size:16px;font-weight:600;padding:15px 24px;border-radius:13px;cursor:pointer;">Смотреть демо</span>
+        </div>
+        <div style="display:flex;gap:28px;margin-top:36px;">
+          <div><div style="font-family:'Spectral',serif;font-size:28px;font-weight:600;">1 200+</div><div style="font-size:13px;color:#9A8C78;margin-top:2px;">заведений</div></div>
+          <div style="width:1px;background:#ECE3D5;"></div>
+          <div><div style="font-family:'Spectral',serif;font-size:28px;font-weight:600;">3 языка</div><div style="font-size:13px;color:#9A8C78;margin-top:2px;">RU · UZ · EN</div></div>
+          <div style="width:1px;background:#ECE3D5;"></div>
+          <div><div style="font-family:'Spectral',serif;font-size:28px;font-weight:600;">0 so‘m</div><div style="font-size:13px;color:#9A8C78;margin-top:2px;">старт</div></div>
+        </div>
+      </div>
+
+      <!-- right: phone + QR tent -->
+      <div style="position:relative;display:flex;justify-content:center;">
+        <div style="width:286px;background:#211A13;border-radius:42px;padding:8px;box-shadow:0 30px 60px rgba(42,33,24,.26);">
+          <div style="border-radius:35px;overflow:hidden;background:#FBF6EE;">
+            <div style="background:#C75B39;padding:14px 16px 14px;color:#fff;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-family:'Spectral',serif;font-size:17px;font-weight:600;">Чайхана «Навбаҳор»</span>
+                <span style="font-size:10px;background:rgba(255,255,255,.2);padding:3px 7px;border-radius:999px;">Стол 12</span>
+              </div>
+            </div>
+            <div style="padding:12px 14px;display:flex;gap:6px;">
+              <span style="padding:6px 11px;border-radius:999px;background:#C75B39;color:#fff;font-size:11px;font-weight:600;">Популярное</span>
+              <span style="padding:6px 11px;border-radius:999px;background:#fff;border:1px solid #ECE3D5;color:#6B5E4F;font-size:11px;">Горячее</span>
+            </div>
+            <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:11px;align-items:center;">
+                <div style="width:52px;height:52px;border-radius:11px;background:repeating-linear-gradient(135deg,#EFE0C9,#EFE0C9 5px,#E9D7BC 5px,#E9D7BC 10px);flex:none;"></div>
+                <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;">Плов «Тошкент»</div><div style="font-size:13px;font-weight:700;margin-top:3px;">45 000 <span style="font-size:10px;color:#9A8C78;font-weight:500;">so‘m</span></div></div>
+                <div style="width:28px;height:28px;border-radius:9px;background:#C75B39;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;line-height:0;flex:none;">+</div>
+              </div>
+              <div style="display:flex;gap:11px;align-items:center;">
+                <div style="width:52px;height:52px;border-radius:11px;background:repeating-linear-gradient(135deg,#EFD9CE,#EFD9CE 5px,#E9CCBE 5px,#E9CCBE 10px);flex:none;"></div>
+                <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;">Шашлык</div><div style="font-size:13px;font-weight:700;margin-top:3px;">38 000 <span style="font-size:10px;color:#9A8C78;font-weight:500;">so‘m</span></div></div>
+                <div style="width:28px;height:28px;border-radius:9px;background:#C75B39;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;line-height:0;flex:none;">+</div>
+              </div>
+            </div>
+            <div style="padding:0 14px 16px;">
+              <div style="background:#C75B39;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;color:#fff;">
+                <span style="font-size:12px;font-weight:600;">Корзина · 2</span>
+                <span style="font-size:13px;font-weight:700;">83 000 so‘m →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- QR tent card -->
+        <div style="position:absolute;bottom:-14px;left:-6px;background:#fff;border:1px solid #ECE3D5;border-radius:16px;padding:14px;box-shadow:0 16px 36px rgba(42,33,24,.16);width:132px;text-align:center;">
+          <div style="width:74px;height:74px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:5px;">
+            <div style="background:#2A2118;border-radius:4px;"></div><div style="background:#E3D6C2;border-radius:4px;"></div><div style="background:#2A2118;border-radius:4px;"></div>
+            <div style="background:#E3D6C2;border-radius:4px;"></div>
+            <div style="position:relative;"><div style="position:absolute;inset:0;background:#C75B39;border-radius:3px;"></div><div style="position:absolute;inset:0;background:#C75B39;border-radius:3px;transform:rotate(45deg);"></div></div>
+            <div style="background:#E3D6C2;border-radius:4px;"></div>
+            <div style="background:#2A2118;border-radius:4px;"></div><div style="background:#E3D6C2;border-radius:4px;"></div><div style="background:#2A2118;border-radius:4px;"></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#9A8C78;margin-top:9px;letter-spacing:0.06em;">СКАН · СТОЛ 12</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FEATURES ===== -->
+  <div id="features" style="max-width:1180px;margin:0 auto;padding:30px 28px 20px;">
+    <div style="text-align:center;margin-bottom:42px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C75B39;letter-spacing:0.14em;text-transform:uppercase;">Возможности</div>
+      <h2 style="font-family:'Spectral',serif;font-size:38px;font-weight:600;letter-spacing:-0.015em;margin:10px 0 0;">Всё для меню и заказов — в одном месте</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+      <!-- f1 -->
+      <div style="background:#fff;border:1px solid #ECE3D5;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(42,33,24,.04);">
+        <div style="width:46px;height:46px;border-radius:13px;background:#FBECE6;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px;padding:11px;"><span style="background:#C75B39;border-radius:1px;"></span><span></span><span style="background:#C75B39;border-radius:1px;"></span><span></span><span style="background:#C75B39;border-radius:1px;"></span><span></span><span style="background:#C75B39;border-radius:1px;"></span><span></span><span style="background:#C75B39;border-radius:1px;"></span></div>
+        <div style="font-size:18px;font-weight:700;margin-top:16px;">QR на каждом столе</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;">Гость сканирует код и сразу видит меню своего стола. Без приложений, без регистрации, без официанта.</div>
+      </div>
+      <!-- f2 -->
+      <div style="background:#fff;border:1px solid #ECE3D5;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(42,33,24,.04);">
+        <div style="width:46px;height:46px;border-radius:13px;background:#EAF0EB;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#3E5C4A;">Аа</div>
+        <div style="font-size:18px;font-weight:700;margin-top:16px;">Три языка из коробки</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;">Русский, узбекский (латиница) и английский. Гость выбирает язык — меню переключается целиком.</div>
+      </div>
+      <!-- f3 -->
+      <div style="background:#fff;border:1px solid #ECE3D5;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(42,33,24,.04);">
+        <div style="width:46px;height:46px;border-radius:13px;background:#FBF0DD;display:flex;align-items:center;justify-content:center;"><span style="font-size:20px;font-weight:800;color:#A06A1E;font-variant-numeric:tabular-nums;">₿</span></div>
+        <div style="font-size:18px;font-weight:700;margin-top:16px;">Цены в сумах</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;">Крупные читаемые числа в формате «45 000 so‘m». Скидки, стоп-листы и веса порций.</div>
+      </div>
+      <!-- f4 -->
+      <div style="background:#fff;border:1px solid #ECE3D5;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(42,33,24,.04);">
+        <div style="width:46px;height:46px;border-radius:13px;background:#FBECE6;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:0 12px;"><span style="height:3px;background:#C75B39;border-radius:2px;"></span><span style="height:3px;background:#C75B39;border-radius:2px;"></span><span style="height:3px;background:#C75B39;border-radius:2px;width:60%;"></span></div>
+        <div style="font-size:18px;font-weight:700;margin-top:16px;">Меню без программиста</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;">Добавляйте блюда, фото и цены сами. Перетаскивайте порядок, включайте и выключайте позиции в один клик.</div>
+      </div>
+      <!-- f5 -->
+      <div style="background:#fff;border:1px solid #ECE3D5;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(42,33,24,.04);">
+        <div style="width:46px;height:46px;border-radius:13px;background:#EAF0EB;display:flex;align-items:center;justify-content:center;position:relative;"><span style="width:10px;height:10px;border-radius:50%;background:#3E5C4A;"></span><span style="position:absolute;width:22px;height:22px;border:2px solid #3E5C4A;border-radius:50%;opacity:.4;"></span></div>
+        <div style="font-size:18px;font-weight:700;margin-top:16px;">Заказы в реальном времени</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;">Новые заказы прилетают на кухню мгновенно. Статусы «принят → готовится → готово → подано».</div>
+      </div>
+      <!-- f6 -->
+      <div style="background:#fff;border:1px solid #ECE3D5;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(42,33,24,.04);">
+        <div style="width:46px;height:46px;border-radius:13px;background:#FBF0DD;display:flex;align-items:flex-end;gap:3px;padding:11px;"><span style="width:6px;height:10px;background:#A06A1E;border-radius:1px;"></span><span style="width:6px;height:18px;background:#A06A1E;border-radius:1px;"></span><span style="width:6px;height:14px;background:#A06A1E;border-radius:1px;"></span></div>
+        <div style="font-size:18px;font-weight:700;margin-top:16px;">Аналитика продаж</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;">Выручка, средний чек, хиты и аутсайдеры меню. Понимайте, что заказывают и что стоит убрать.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <div id="how" style="max-width:1180px;margin:0 auto;padding:64px 28px;">
+    <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:14px;">
+      <div style="width:54px;height:1px;background:#E3D6C2;"></div>
+      <div style="position:relative;width:12px;height:12px;"><div style="position:absolute;inset:0;background:#E0A04D;border-radius:2px;"></div><div style="position:absolute;inset:0;background:#E0A04D;border-radius:2px;transform:rotate(45deg);"></div></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C75B39;letter-spacing:0.14em;text-transform:uppercase;">Как это работает</div>
+      <div style="position:relative;width:12px;height:12px;"><div style="position:absolute;inset:0;background:#E0A04D;border-radius:2px;"></div><div style="position:absolute;inset:0;background:#E0A04D;border-radius:2px;transform:rotate(45deg);"></div></div>
+      <div style="width:54px;height:1px;background:#E3D6C2;"></div>
+    </div>
+    <h2 style="font-family:'Spectral',serif;font-size:38px;font-weight:600;text-align:center;letter-spacing:-0.015em;margin:0 0 44px;">Запуск за 5 минут</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+      <div style="text-align:center;">
+        <div style="width:60px;height:60px;margin:0 auto;border-radius:18px;background:#C75B39;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:26px;font-weight:600;box-shadow:0 8px 18px rgba(199,91,57,.24);">1</div>
+        <div style="font-size:19px;font-weight:700;margin-top:18px;">Зарегистрируйте заведение</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;max-width:300px;margin-left:auto;margin-right:auto;">Название, тип, город и телефон. Кабинет готов сразу — без договоров и оборудования.</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:60px;height:60px;margin:0 auto;border-radius:18px;background:#E0A04D;color:#2A2118;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:26px;font-weight:600;box-shadow:0 8px 18px rgba(224,160,77,.28);">2</div>
+        <div style="font-size:19px;font-weight:700;margin-top:18px;">Добавьте меню</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;max-width:300px;margin-left:auto;margin-right:auto;">Блюда, фото и цены на трёх языках. Можно импортировать готовый список одним файлом.</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:60px;height:60px;margin:0 auto;border-radius:18px;background:#3E5C4A;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:26px;font-weight:600;box-shadow:0 8px 18px rgba(62,92,74,.26);">3</div>
+        <div style="font-size:19px;font-weight:700;margin-top:18px;">Распечатайте QR на столы</div>
+        <div style="font-size:14px;color:#6B5E4F;line-height:1.55;margin-top:8px;max-width:300px;margin-left:auto;margin-right:auto;">Скачайте готовые таблички с QR для каждого стола — и принимайте первые заказы.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PRICING ===== -->
+  <div id="pricing" style="background:#FFFCF7;border-top:1px solid #ECE3D5;border-bottom:1px solid #ECE3D5;">
+    <div style="max-width:1180px;margin:0 auto;padding:64px 28px;">
+      <div style="text-align:center;margin-bottom:44px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C75B39;letter-spacing:0.14em;text-transform:uppercase;">Цены</div>
+        <h2 style="font-family:'Spectral',serif;font-size:38px;font-weight:600;letter-spacing:-0.015em;margin:10px 0 0;">Прозрачно, в сумах, без комиссии с заказов</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;">
+        <!-- start -->
+        <div style="background:#fff;border:1px solid #ECE3D5;border-radius:20px;padding:30px;">
+          <div style="font-size:15px;font-weight:700;">Старт</div>
+          <div style="font-size:13px;color:#9A8C78;margin-top:4px;">Для одной точки</div>
+          <div style="margin:22px 0;display:flex;align-items:baseline;gap:8px;"><span style="font-family:'Spectral',serif;font-size:42px;font-weight:600;">0</span><span style="font-size:15px;color:#9A8C78;">so‘m / мес</span></div>
+          <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#3F352A;">
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>1 заведение</div>
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>До 30 блюд</div>
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>QR-меню, 3 языка</div>
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>Приём заказов</div>
+          </div>
+          <div style="margin-top:26px;text-align:center;padding:13px;border-radius:12px;border:1px solid #E3D6C2;color:#2A2118;font-size:15px;font-weight:600;cursor:pointer;">Начать бесплатно</div>
+        </div>
+        <!-- business (popular) -->
+        <div style="background:#241C14;border-radius:20px;padding:30px;position:relative;box-shadow:0 20px 44px rgba(42,33,24,.28);">
+          <div style="position:absolute;top:22px;right:24px;background:#E0A04D;color:#2A2118;font-size:11px;font-weight:700;padding:4px 11px;border-radius:999px;">Популярный</div>
+          <div style="font-size:15px;font-weight:700;color:#FBF6EE;">Бизнес</div>
+          <div style="font-size:13px;color:#9A8C78;margin-top:4px;">Для активной точки</div>
+          <div style="margin:22px 0;display:flex;align-items:baseline;gap:8px;color:#fff;"><span style="font-family:'Spectral',serif;font-size:42px;font-weight:600;">149 000</span><span style="font-size:15px;color:#9A8C78;">so‘m / мес</span></div>
+          <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#E8DECE;">
+            <div style="display:flex;gap:9px;"><span style="color:#E0A04D;font-weight:700;">✓</span>До 3 заведений</div>
+            <div style="display:flex;gap:9px;"><span style="color:#E0A04D;font-weight:700;">✓</span>Безлимит блюд</div>
+            <div style="display:flex;gap:9px;"><span style="color:#E0A04D;font-weight:700;">✓</span>Аналитика и отчёты</div>
+            <div style="display:flex;gap:9px;"><span style="color:#E0A04D;font-weight:700;">✓</span>Стоп-листы, акции</div>
+            <div style="display:flex;gap:9px;"><span style="color:#E0A04D;font-weight:700;">✓</span>Поддержка в Telegram</div>
+          </div>
+          <div style="margin-top:26px;text-align:center;padding:13px;border-radius:12px;background:#C75B39;color:#fff;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 6px 16px rgba(199,91,57,.34);">Попробовать 14 дней</div>
+        </div>
+        <!-- network -->
+        <div style="background:#fff;border:1px solid #ECE3D5;border-radius:20px;padding:30px;">
+          <div style="font-size:15px;font-weight:700;">Сеть</div>
+          <div style="font-size:13px;color:#9A8C78;margin-top:4px;">Для сетей и франшиз</div>
+          <div style="margin:22px 0;display:flex;align-items:baseline;gap:8px;"><span style="font-family:'Spectral',serif;font-size:42px;font-weight:600;">Договорная</span></div>
+          <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#3F352A;">
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>Безлимит точек</div>
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>Роли и права персонала</div>
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>Единое меню сети</div>
+            <div style="display:flex;gap:9px;"><span style="color:#3E5C4A;font-weight:700;">✓</span>Интеграции и API</div>
+          </div>
+          <div style="margin-top:26px;text-align:center;padding:13px;border-radius:12px;border:1px solid #E3D6C2;color:#2A2118;font-size:15px;font-weight:600;cursor:pointer;">Связаться с нами</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REGISTRATION ===== -->
+  <div id="register" style="position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background-image:radial-gradient(#ECE0CD 1.4px,transparent 1.4px);background-size:22px 22px;opacity:.5;"></div>
+    <div style="position:relative;max-width:1180px;margin:0 auto;padding:72px 28px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;">
+      <!-- left copy -->
+      <div>
+        <h2 style="font-family:'Spectral',serif;font-size:42px;font-weight:600;letter-spacing:-0.018em;line-height:1.08;margin:0;">Подключите заведение<br>за 5 минут</h2>
+        <p style="font-size:17px;color:#6B5E4F;line-height:1.6;margin:18px 0 28px;max-width:430px;">Заполните короткую форму — и сразу попадёте в кабинет, где можно добавить меню и получить QR-коды для столов.</p>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;gap:13px;align-items:flex-start;">
+            <span style="width:26px;height:26px;border-radius:8px;background:#EAF0EB;color:#3E5C4A;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;">✓</span>
+            <div><div style="font-size:15px;font-weight:600;">Бесплатный тариф навсегда</div><div style="font-size:13px;color:#9A8C78;margin-top:1px;">Карта не нужна, оборудование не нужно.</div></div>
+          </div>
+          <div style="display:flex;gap:13px;align-items:flex-start;">
+            <span style="width:26px;height:26px;border-radius:8px;background:#EAF0EB;color:#3E5C4A;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;">✓</span>
+            <div><div style="font-size:15px;font-weight:600;">Поможем перенести меню</div><div style="font-size:13px;color:#9A8C78;margin-top:1px;">Пришлите фото бумажного меню — заполним за вас.</div></div>
+          </div>
+          <div style="display:flex;gap:13px;align-items:flex-start;">
+            <span style="width:26px;height:26px;border-radius:8px;background:#EAF0EB;color:#3E5C4A;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;">✓</span>
+            <div><div style="font-size:15px;font-weight:600;">Поддержка на русском и узбекском</div><div style="font-size:13px;color:#9A8C78;margin-top:1px;">Отвечаем в Telegram в течение часа.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- form card -->
+      <div style="background:#fff;border:1px solid #ECE3D5;border-radius:22px;padding:34px;box-shadow:0 24px 56px rgba(42,33,24,.14);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+          <div style="font-family:'Spectral',serif;font-size:22px;font-weight:600;">Регистрация заведения</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9A8C78;">Шаг 1 / 2</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:15px;">
+          <div>
+            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">Название заведения</div>
+            <div style="border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;font-weight:500;">Чайхана «Навбаҳор»</div>
+          </div>
+          <div>
+            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">Тип заведения</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="padding:9px 15px;border-radius:10px;background:#C75B39;color:#fff;font-size:13px;font-weight:600;">Чайхана</span>
+              <span style="padding:9px 15px;border-radius:10px;background:#FBF6EE;border:1px solid #E3D6C2;color:#6B5E4F;font-size:13px;font-weight:500;">Ресторан</span>
+              <span style="padding:9px 15px;border-radius:10px;background:#FBF6EE;border:1px solid #E3D6C2;color:#6B5E4F;font-size:13px;font-weight:500;">Кафе</span>
+              <span style="padding:9px 15px;border-radius:10px;background:#FBF6EE;border:1px solid #E3D6C2;color:#6B5E4F;font-size:13px;font-weight:500;">Фастфуд</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">Город</div>
+              <div style="border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;display:flex;align-items:center;justify-content:space-between;">Ташкент <span style="color:#9A8C78;font-size:11px;">▾</span></div>
+            </div>
+            <div>
+              <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">Телефон</div>
+              <div style="border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;color:#9A8C78;">+998 __ ___ __ __</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-top:2px;">
+            <span style="width:20px;height:20px;border-radius:6px;background:#C75B39;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;">✓</span>
+            <div style="font-size:12.5px;color:#9A8C78;line-height:1.45;">Соглашаюсь с <span style="color:#C75B39;font-weight:600;">условиями</span> и <span style="color:#C75B39;font-weight:600;">политикой данных</span>.</div>
+          </div>
+          <div style="margin-top:6px;text-align:center;padding:15px;border-radius:13px;background:#C75B39;color:#fff;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 20px rgba(199,91,57,.26);">Создать кабинет →</div>
+          <div style="text-align:center;font-size:13px;color:#9A8C78;">Уже есть аккаунт? <span style="color:#C75B39;font-weight:600;cursor:pointer;">Войти</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div style="background:#241C14;color:#C2B6A2;">
+    <div style="max-width:1180px;margin:0 auto;padding:48px 28px;display:flex;gap:40px;flex-wrap:wrap;justify-content:space-between;">
+      <div style="max-width:300px;">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
+          <div style="width:32px;height:32px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:2.5px;flex:none;">
+            <div style="background:#C75B39;border-radius:2px;"></div><div style="background:#5A4F40;border-radius:2px;"></div><div style="background:#C75B39;border-radius:2px;"></div>
+            <div style="background:#5A4F40;border-radius:2px;"></div>
+            <div style="position:relative;"><div style="position:absolute;inset:0;background:#C75B39;border-radius:1.5px;"></div><div style="position:absolute;inset:0;background:#C75B39;border-radius:1.5px;transform:rotate(45deg);"></div></div>
+            <div style="background:#5A4F40;border-radius:2px;"></div>
+            <div style="background:#C75B39;border-radius:2px;"></div><div style="background:#5A4F40;border-radius:2px;"></div><div style="background:#C75B39;border-radius:2px;"></div>
+          </div>
+          <span style="font-family:'Spectral',serif;font-size:22px;font-weight:600;color:#FBF6EE;">Menus</span>
+        </div>
+        <div style="font-size:13.5px;line-height:1.6;color:#9A8C78;">QR-меню и приём заказов для ресторанов, кафе и чайхан Узбекистана.</div>
+      </div>
+      <div style="display:flex;gap:56px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:#7A6E5C;margin-bottom:14px;">Продукт</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;"><a href="#features" style="cursor:pointer;">Возможности</a><a href="#pricing" style="cursor:pointer;">Цены</a><span style="cursor:pointer;">Демо-меню</span></div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:#7A6E5C;margin-bottom:14px;">Поддержка</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;"><span style="cursor:pointer;">Помощь</span><span style="cursor:pointer;">Telegram</span><span style="cursor:pointer;">Контакты</span></div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:#7A6E5C;margin-bottom:14px;">Язык</div>
+          <div style="display:flex;background:#312719;border:1px solid #3D3120;border-radius:999px;padding:3px;gap:1px;">
+            <span style="padding:5px 11px;border-radius:999px;background:#C75B39;color:#fff;font-size:12px;font-weight:700;">RU</span>
+            <span style="padding:5px 10px;border-radius:999px;color:#9A8C78;font-size:12px;font-weight:600;">UZ</span>
+            <span style="padding:5px 10px;border-radius:999px;color:#9A8C78;font-size:12px;font-weight:600;">EN</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #3A2F1F;">
+      <div style="max-width:1180px;margin:0 auto;padding:18px 28px;font-size:13px;color:#7A6E5C;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <span>© 2026 Menus. Ташкент, Узбекистан.</span>
+        <span>Сделано для общепита Узбекистана</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

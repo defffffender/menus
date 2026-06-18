@@ -1,0 +1,29 @@
+{% comment %}Фрагмент шкалы статуса заказа (HTMX-опрос гостем).{% endcomment %}
+<div class="flex items-center justify-between mb-4"
+     hx-get="{% url 'orders:status_poll' order.public_token %}"
+     hx-trigger="every 6s" hx-target="#order-status" hx-swap="outerHTML" id="order-status">
+  <span class="text-sm text-ink/50">{{ t.ost_status }}</span>
+  {% if order.status == 'cancelled' %}
+    <span class="text-sm font-semibold text-red-500">{{ t.ost_cancelled }}</span>
+  {% else %}
+    <span class="text-sm font-semibold text-brand">{% for s in flow %}{% if s.current %}{{ s.label }}{% endif %}{% endfor %}</span>
+  {% endif %}
+</div>
+{% if order.status == 'cancelled' %}
+<div class="bg-red-50 border border-red-200 text-red-600 rounded-2xl px-4 py-3 text-sm text-center mb-4">{{ t.ost_cancelled }}</div>
+{% else %}
+<ol class="flex items-center mb-6">
+  {% for s in flow %}
+  <li class="flex-1 flex flex-col items-center relative">
+    {% if not forloop.first %}
+    <span class="absolute right-1/2 top-2.5 h-0.5 w-full {% if s.done %}bg-brand{% else %}bg-line{% endif %}"></span>
+    {% endif %}
+    <span class="relative z-10 w-5 h-5 rounded-full flex items-center justify-center text-[10px]
+                 {% if s.done %}bg-brand text-white{% else %}bg-line text-ink/40{% endif %}">
+      {% if s.done %}✓{% endif %}
+    </span>
+    <span class="mt-1.5 text-[10px] text-center {% if s.current %}font-semibold text-brand{% elif s.done %}text-ink/60{% else %}text-ink/30{% endif %}">{{ s.label }}</span>
+  </li>
+  {% endfor %}
+</ol>
+{% endif %}

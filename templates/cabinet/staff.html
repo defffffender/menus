@@ -1,0 +1,79 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.staff_title }}{% endblock %}
+{% block subheading %}{{ t.staff_subtitle }}{% endblock %}
+{% block content %}
+<div class="grid lg:grid-cols-3 gap-6 items-start">
+
+  <!-- invite form -->
+  <div class="bg-white border border-line rounded-2xl p-5 lg:order-2">
+    <h2 class="font-semibold mb-4">{{ t.staff_invite }}</h2>
+    {% if assignable %}
+    <form method="post" action="{% url 'restaurants:staff' restaurant.slug %}" class="space-y-3">
+      {% csrf_token %}
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.staff_phone }}</label>
+        <input name="phone" required placeholder="+998 90 123 45 67"
+               class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.staff_name }}</label>
+        <input name="full_name"
+               class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.staff_role }}</label>
+        <select name="role" class="w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
+          {% for value, label in assignable %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="w-full bg-brand text-white font-semibold rounded-xl py-2.5">{{ t.staff_add }}</button>
+      <p class="text-[11px] text-ink/40">{{ t.staff_hint }}</p>
+    </form>
+    {% else %}
+    <p class="text-sm text-ink/50">{{ t.staff_no_assign }}</p>
+    {% endif %}
+  </div>
+
+  <!-- members list -->
+  <div class="lg:col-span-2 lg:order-1">
+    <div class="bg-white border border-line rounded-2xl divide-y divide-line">
+      {% for row in rows %}
+      <div class="flex items-center gap-3 p-4 {% if not row.m.is_active %}opacity-50{% endif %}">
+        <span class="w-10 h-10 rounded-full bg-forest/10 text-forest flex items-center justify-center text-sm font-semibold flex-none">
+          {{ row.m.user.full_name|default:row.m.user.phone|slice:":2"|upper }}
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-sm truncate">
+            {{ row.m.user.full_name|default:row.m.user.phone }}
+            {% if row.is_self %}<span class="text-[11px] text-ink/40 font-normal">· {{ t.staff_you }}</span>{% endif %}
+          </div>
+          <div class="text-xs text-ink/50">{{ row.m.user.phone }}</div>
+        </div>
+
+        {% if row.can_manage %}
+        <form method="post" action="{% url 'restaurants:staff_role' restaurant.slug row.m.pk %}" class="flex-none">
+          {% csrf_token %}
+          <select name="role" onchange="this.form.submit()"
+                  class="text-xs font-semibold border border-line rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:border-brand">
+            <option value="{{ row.m.role }}" selected>{{ row.role_label }}</option>
+            {% for value, label in assignable %}
+              {% if value != row.m.role %}<option value="{{ value }}">{{ label }}</option>{% endif %}
+            {% endfor %}
+          </select>
+        </form>
+        <form method="post" action="{% url 'restaurants:staff_remove' restaurant.slug row.m.pk %}" class="flex-none"
+              onsubmit="return confirm('{{ t.staff_remove_confirm }}')">
+          {% csrf_token %}
+          <button class="text-xs font-semibold text-red-500 hover:text-red-700">{{ t.staff_remove }}</button>
+        </form>
+        {% else %}
+        <span class="flex-none text-xs font-semibold bg-clay/20 text-ink rounded-full px-3 py-1">{{ row.role_label }}</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

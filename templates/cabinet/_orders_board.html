@@ -1,0 +1,63 @@
+{% comment %}HTMX-фрагмент доски заказов. Кнопки статусов целятся в этот же контейнер.{% endcomment %}
+<div class="flex items-center gap-3 mb-4 text-sm">
+  <span class="font-semibold">{{ total_active }} <span class="text-ink/50 font-normal">{{ t.ord_active }}</span></span>
+  {% if closed_today %}<span class="text-ink/40">· {{ closed_today }} {{ t.ord_closed_today }}</span>{% endif %}
+</div>
+
+{% if total_active %}
+<div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+  {% for col in columns %}
+  <div>
+    <div class="flex items-center gap-2 mb-2 px-1">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-ink/50">{{ col.label }}</h2>
+      <span class="text-xs text-ink/30">{{ col.orders|length }}</span>
+    </div>
+    <div class="space-y-3">
+      {% for order in col.orders %}
+      <div class="bg-white border border-line rounded-2xl p-3.5 {% if order.status == 'new' %}ring-2 ring-brand/40{% endif %}">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-semibold text-sm">№ {{ order.pk }}</span>
+          <span class="text-xs text-ink/50">
+            {% if order.table %}{{ t.ord_table }} {{ order.table.name }}{% else %}{{ t.ord_no_table }}{% endif %}
+          </span>
+        </div>
+        <ul class="text-sm space-y-0.5 mb-2">
+          {% for item in order.items.all %}
+          <li class="flex justify-between gap-2">
+            <span class="min-w-0 truncate">{{ item.name }} <span class="text-ink/40">×{{ item.quantity }}</span></span>
+            <span class="tabular-nums text-ink/60 flex-none">{{ item.line_total }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% if order.comment %}
+        <div class="text-xs bg-sand rounded-lg px-2.5 py-1.5 mb-2 text-ink/70">{{ t.ord_comment }}: {{ order.comment }}</div>
+        {% endif %}
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-xs text-ink/40">{{ order.created_at|time:'H:i' }}</span>
+          <span class="font-semibold tabular-nums">{{ order.total }} <span class="text-[11px] text-ink/40 font-normal">{{ t.ord_som }}</span></span>
+        </div>
+        <div class="flex gap-2">
+          <button hx-post="{% url 'orders:set_status' restaurant.slug order.pk %}"
+                  hx-vals='{"action": "advance"}'
+                  hx-target="#board" hx-swap="innerHTML"
+                  class="flex-1 bg-brand text-white text-xs font-semibold rounded-lg py-2">
+            {% if order.status == 'served' %}{{ t.ord_close }}{% else %}{{ t.ord_advance }}{% endif %}
+          </button>
+          <button hx-post="{% url 'orders:set_status' restaurant.slug order.pk %}"
+                  hx-vals='{"action": "cancel"}'
+                  hx-confirm="{{ t.ord_cancel_confirm }}"
+                  hx-target="#board" hx-swap="innerHTML"
+                  class="text-xs font-semibold text-red-500 px-2.5 rounded-lg hover:bg-red-50">{{ t.ord_cancel }}</button>
+        </div>
+      </div>
+      {% endfor %}
+      {% if not col.orders %}
+      <div class="text-xs text-ink/30 px-1 py-3">{{ t.ord_empty_col }}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="bg-white border border-line rounded-2xl p-12 text-center text-ink/50">{{ t.ord_no_active }}</div>
+{% endif %}

@@ -1,0 +1,34 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.qr_title }}{% endblock %}
+{% block subheading %}{{ t.qr_subtitle }}{% endblock %}
+{% block extra_head %}
+<style>
+  @media print {
+    aside, header, .no-print { display:none !important; }
+    main { padding:0 !important; overflow:visible !important; }
+    .qr-card { break-inside:avoid; border-color:#ddd !important; }
+  }
+</style>
+{% endblock %}
+{% block actions %}
+{% if tables %}
+<button onclick="window.print()" class="no-print bg-brand text-white text-sm font-semibold px-4 py-2.5 rounded-xl">{{ t.qr_print }}</button>
+{% endif %}
+{% endblock %}
+{% block content %}
+{% if tables %}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+  {% for table in tables %}
+  <div class="qr-card bg-white border border-line rounded-2xl p-5 text-center">
+    <div class="font-display text-lg font-semibold mb-1">{{ restaurant.name }}</div>
+    <div class="text-sm text-ink/60 mb-3">{{ table.name }}</div>
+    <img src="{% url 'restaurants:table_qr_png' restaurant.slug table.pk %}" alt="QR"
+         class="w-40 h-40 mx-auto">
+    <div class="text-[11px] text-ink/50 mt-3 font-mono">{{ t.qr_scan }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="bg-white border border-line rounded-2xl p-10 text-center text-ink/50">{{ t.qr_empty }}</div>
+{% endif %}
+{% endblock %}

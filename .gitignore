@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+/staticfiles/
+/static_root/
+
+# Загружаемые медиа (фото блюд, логотипы) — не версионируем
+/media/
+
+# Окружение / секреты
+.env
+.env.*
+
+# Claude Code (локальные настройки)
+.claude/
+
+# IDE / ОС
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

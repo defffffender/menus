@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Menus{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { brand:'#C75B39', sand:'#FBF6EE', ink:'#2A2118', clay:'#E0A04D', forest:'#3E5C4A', line:'#ECE3D5' },
+      fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'] }
+    } }
+  }
+</script>
+</head>
+<body class="font-body bg-sand text-ink min-h-screen">
+
+<header class="sticky top-0 z-50 bg-sand/85 backdrop-blur border-b border-line">
+  <div class="max-w-5xl mx-auto h-16 flex items-center gap-4 px-5">
+    <a href="/" class="font-display text-2xl font-semibold">Menus</a>
+    <div class="flex-1"></div>
+    <div class="flex bg-white border border-line rounded-full p-0.5 text-xs font-semibold">
+      {% for code, label in LANGUAGES %}
+      <a href="{% url 'core:set_language' %}?lang={{ code }}&next={{ request.path|urlencode }}"
+         class="px-2.5 py-1 rounded-full {% if code == LANG %}bg-brand text-white{% else %}text-ink/50{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    {% if user.is_authenticated %}
+      <a href="{% url 'accounts:logout' %}" class="text-sm font-semibold">{{ t.cab_logout }}</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" class="text-sm font-semibold">{{ t.nav_login }}</a>
+    {% endif %}
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-5 py-10">
+  {% if messages %}
+    <div class="max-w-md mx-auto mb-6 space-y-2">
+      {% for m in messages %}
+      <div class="rounded-xl px-4 py-3 text-sm {% if m.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-forest/10 text-forest border border-forest/20{% endif %}">{{ m }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>
