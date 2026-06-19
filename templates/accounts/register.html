@@ -25,7 +25,7 @@
       </div>
       <div>
         <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.reg_phone }}</label>
-        <input name="phone" required placeholder="+998 __ ___ __ __" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
+        <input name="phone" required data-phone-mask inputmode="tel" maxlength="19" placeholder="+998 90 123-45-67" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
       </div>
     </div>
     <button class="w-full bg-brand text-white font-semibold rounded-xl py-3.5 hover:opacity-95">{{ t.reg_submit }}</button>
@@ -34,4 +34,5 @@
     <a href="{% url 'accounts:login' %}" class="text-brand font-semibold">{{ t.nav_login }}</a>
   </p>
 </div>
+{% include 'partials/phone_mask.html' %}
 {% endblock %}

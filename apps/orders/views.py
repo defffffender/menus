@@ -13,6 +13,7 @@ from apps.restaurants.models import Table
 from apps.restaurants.views import _get_restaurant, _shell
 
 from .models import Order, OrderItem
+from .services import apply_status_action, place_order
 
 
 # --- гость ------------------------------------------------------------------
@@ -64,10 +65,7 @@ def create_order(request, qr_token):
     if not items:
         return JsonResponse({'ok': False, 'error': 'unavailable'}, status=400)
 
-    order = Order.objects.create(restaurant=restaurant, table=table, comment=comment)
-    for it in items:
-        it.order = order
-    OrderItem.objects.bulk_create(items)
+    order = place_order(restaurant, table, comment, items)
 
     return JsonResponse({
         'ok': True,
@@ -85,22 +83,21 @@ def order_status(request, token):
         'order': order,
         'restaurant': order.restaurant,
         'table': order.table,
-        'flow': _status_steps(request, order),
+        'flow': _status_steps(order, resolve_lang(request)),
     })
 
 
 def order_status_poll(request, token):
-    """HTMX-фрагмент статуса (опрос гостем)."""
+    """HTMX-фрагмент статуса (резервный опрос гостем, если нет WS)."""
     order = get_object_or_404(Order, public_token=token)
     return render(request, 'public/_order_status.html', {
         'order': order,
-        'flow': _status_steps(request, order),
+        'flow': _status_steps(order, resolve_lang(request)),
     })
 
 
-def _status_steps(request, order):
+def _status_steps(order, lang):
     """Шкала статусов для гостя: пройденные/текущий/будущие."""
-    lang = resolve_lang(request)
     if order.status == Order.Status.CANCELLED:
         return [{'key': 'cancelled', 'label': translate(lang, 'st_cancelled'),
                  'done': True, 'current': True, 'cancelled': True}]
@@ -130,33 +127,22 @@ def orders(request, slug):
 
 @login_required
 def orders_feed(request, slug):
-    """HTMX-фрагмент: колонки активных заказов по статусам."""
+    """HTMX-фрагмент: колонки активных заказов (начальная загрузка + резервный опрос)."""
     restaurant = _get_restaurant(request, slug, perm='orders')
-    return render(request, 'cabinet/_orders_board.html', _board_context(request, restaurant))
+    return render(request, 'cabinet/_orders_board.html', _board_context(restaurant, resolve_lang(request)))
 
 
 @login_required
 @require_POST
 def order_set_status(request, slug, pk):
-    """Сменить статус заказа (вперёд по цепочке / отмена / закрыть)."""
+    """Сменить статус заказа (вперёд по цепочке / отмена). Realtime разошлётся сам."""
     restaurant = _get_restaurant(request, slug, perm='orders')
     order = get_object_or_404(Order, pk=pk, restaurant=restaurant)
-    action = request.POST.get('action')
-
-    if action == 'cancel':
-        order.status = Order.Status.CANCELLED
-        order.save(update_fields=['status', 'updated_at'])
-    elif action == 'advance':
-        nxt = order.next_status()
-        if nxt:
-            order.status = nxt
-            order.save(update_fields=['status', 'updated_at'])
-
-    return render(request, 'cabinet/_orders_board.html', _board_context(request, restaurant))
+    apply_status_action(order, request.POST.get('action'))
+    return render(request, 'cabinet/_orders_board.html', _board_context(restaurant, resolve_lang(request)))
 
 
-def _board_context(request, restaurant):
-    lang = resolve_lang(request)
+def _board_context(restaurant, lang):
     active = (
         restaurant.orders
         .filter(status__in=Order.FLOW)

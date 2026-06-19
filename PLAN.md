@@ -217,10 +217,44 @@ htmx `configRequest` берёт токен из cookie.
 Менеджер 2 > Официант/Кухня 1. Назначать/трогать можно роли строго ниже своей,
 владельца — никогда, себя — нельзя.
 
-### Этап 7. Полировка и деплой
-- [ ] Мультиязычность интерфейса (ru/uz/en).
-- [ ] Реальная отправка SMS через Eskiz.
-- [ ] Переезд на PostgreSQL, настройка медиа, деплой на VPS.
+### Этап 7. Прод-архитектура и деплой (async, под масштаб 1000+ заведений)
+
+**Целевая архитектура:**
+```
+nginx (TLS) → Uvicorn-воркеры (Django ASGI: HTTP-вьюхи + Channels-consumers)
+PostgreSQL ← PgBouncer (пул)
+Redis ── channel layer (WS-группы) + кэш + брокер Celery
+Celery worker ── Eskiz SMS, превью картинок
+Объектное хранилище (S3/R2) + CDN ── фото блюд
+```
+
+**Принципы:**
+- **Мутации — по HTTP** (auth/CSRF/идемпотентность), **уведомления — по WebSocket** (push).
+- HTTP-вьюхи остаются **синхронными** (ASGI гоняет в threadpool); async — только consumers. ORM на async НЕ переписываем.
+- Каждый компонент конфигурится через env, без локального состояния → горизонтальное масштабирование без переписывания. Redis-channel-layer делает WS-группы общими между серверами.
+- **Dev работает без новой инфраструктуры:** InMemory channel layer, Celery eager, SQLite, локальное хранилище. Прод переключается через env.
+
+**Решения (зафиксированы):** realtime = HTML-фрагменты (HTMX over WS); фото = объектное хранилище + CDN; Celery + Redis — сразу.
+
+**Подэтапы:**
+- [x] **7.1 Конфиг/секреты:** `django-environ`, settings из env (`SECRET_KEY`, `DEBUG`,
+      `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `REDIS_URL`). Dev-дефолты сохранены.
+- [x] **7.2 Realtime (Channels):** ASGI-роутинг (`menus/asgi.py`), `CabinetOrdersConsumer`
+      (auth+RBAC, группа `orders.<rid>`) и `GuestOrderConsumer` (`public_token`, `order.<id>`).
+      Сервис-слой `apps/orders/services.py` (`place_order`/`apply_status_action` = запись +
+      `transaction.on_commit` → `notify_order_change`). Лёгкий сигнал в группу → consumer
+      рендерит фрагмент на своём языке и шлёт OOB-swap. Начальная отрисовка/ресинк при
+      (ре)коннекте. HTTP-загрузка + медленный опрос (20с) — резерв на случай обрыва WS.
+      Слой: InMemory в dev, Redis на проде (`REDIS_URL`). Сервер: daphne (ASGI).
+      Проверено: ApplicationCommunicator (10/10) + сетевой смоук через Daphne.
+- [ ] **7.3 Celery + Redis:** брокер, задачи (Eskiz SMS, ресайз фото). Dev — eager.
+- [ ] **7.4 PostgreSQL:** `DATABASE_URL`, индексы (`Order(restaurant_id, status)`,
+      `created_at`), PgBouncer (transaction pooling, `CONN_MAX_AGE=0`).
+- [ ] **7.5 Медиа → объектное хранилище:** `django-storages` (S3/R2), превью при загрузке.
+- [ ] **7.6 Кэш меню:** Redis-кэш гостевого меню по `(заведение, язык)`, сброс при правке.
+- [ ] **7.7 Фронт:** сборка Tailwind в статику (убрать CDN), `collectstatic`, WhiteNoise/nginx.
+- [ ] **7.8 Деплой:** nginx (TLS/Let's Encrypt, WS-upgrade), systemd (uvicorn, celery),
+      `.env` на VPS, домен в `ALLOWED_HOSTS`/`CSRF_TRUSTED_ORIGINS`, runbook.
 
 ---
 
@@ -231,7 +265,7 @@ htmx `configRequest` берёт токен из cookie.
 - Несколько филиалов под одним аккаунтом.
 - Темы оформления меню под бренд.
 - Онлайн-оплата (Payme / Click / Uzum) — если потребуется.
-- Real-time уведомления (Django Channels / websockets) вместо опроса.
+- Per-card OOB-обновления доски (вместо полной перерисовки) — если понадобится.
 - Звуковое уведомление о новом заказе.
 
 ---

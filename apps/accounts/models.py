@@ -14,6 +14,20 @@ def normalize_phone(phone):
     return '+' + ''.join(ch for ch in str(phone) if ch.isdigit())
 
 
+def is_valid_uz_phone(phone):
+    """Узбекский мобильный: +998 и ровно 9 цифр (всего 12 цифр)."""
+    import re
+    return bool(re.fullmatch(r'\+998\d{9}', normalize_phone(phone) or ''))
+
+
+# Лимиты тарифов (None = без ограничений). Соответствуют лендингу.
+PLAN_LIMITS = {
+    'start':    {'venues': 1,    'dishes': 30},
+    'business': {'venues': 3,    'dishes': None},
+    'network':  {'venues': None, 'dishes': None},
+}
+
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -43,8 +57,16 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """Пользователь платформы. Идентификатор входа — телефон +998."""
 
+    class Plan(models.TextChoices):
+        START = 'start', 'Старт'
+        BUSINESS = 'business', 'Бизнес'
+        NETWORK = 'network', 'Сеть'
+
     phone = models.CharField('Телефон', max_length=20, unique=True)
     full_name = models.CharField('Имя', max_length=150, blank=True)
+    # Тариф владельца: ограничивает число его заведений и блюд в них.
+    # Меняется вручную/в админке — оплата подключается отдельно.
+    plan = models.CharField('Тариф', max_length=20, choices=Plan.choices, default=Plan.START)
     is_active = models.BooleanField('Активен', default=True)
     is_staff = models.BooleanField('Доступ в админку', default=False)
     date_joined = models.DateTimeField('Дата регистрации', default=timezone.now)
@@ -60,6 +82,25 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.full_name or self.phone
+
+    @property
+    def venue_limit(self):
+        """Сколько заведений можно иметь (None = без лимита)."""
+        return PLAN_LIMITS.get(self.plan, PLAN_LIMITS['start'])['venues']
+
+    @property
+    def dish_limit(self):
+        """Сколько блюд можно в одном заведении (None = без лимита)."""
+        return PLAN_LIMITS.get(self.plan, PLAN_LIMITS['start'])['dishes']
+
+    @property
+    def venues_used(self):
+        return self.owned_restaurants.count()
+
+    @property
+    def can_add_venue(self):
+        limit = self.venue_limit
+        return limit is None or self.venues_used < limit
 
 
 class PhoneOTP(models.Model):

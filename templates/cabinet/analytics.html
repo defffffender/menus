@@ -1,0 +1,64 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.an_title }}{% endblock %}
+{% block subheading %}{{ t.an_subtitle }}{% endblock %}
+{% block content %}
+
+<!-- KPI сегодня -->
+<div class="text-sm font-semibold text-ink/50 mb-2">{{ t.an_today }}</div>
+<div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white border border-line rounded-2xl p-5">
+    <div class="text-xs text-ink/50">{{ t.an_orders }}</div>
+    <div class="text-3xl font-bold mt-1 tabular-nums">{{ today_count }}</div>
+  </div>
+  <div class="bg-white border border-line rounded-2xl p-5">
+    <div class="text-xs text-ink/50">{{ t.an_revenue }}</div>
+    <div class="text-3xl font-bold mt-1 tabular-nums">{{ today_rev }} <span class="text-sm text-ink/40 font-normal">{{ t.an_som }}</span></div>
+  </div>
+  <div class="bg-white border border-line rounded-2xl p-5">
+    <div class="text-xs text-ink/50">{{ t.an_avg_check }}</div>
+    <div class="text-3xl font-bold mt-1 tabular-nums">{{ avg_check }} <span class="text-sm text-ink/40 font-normal">{{ t.an_som }}</span></div>
+  </div>
+  <div class="bg-white border border-line rounded-2xl p-5 {% if active_now %}ring-2 ring-brand/30{% endif %}">
+    <div class="text-xs text-ink/50">{{ t.an_active_now }}</div>
+    <div class="text-3xl font-bold mt-1 tabular-nums">{{ active_now }}</div>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-6 items-start">
+  <!-- неделя -->
+  <div class="bg-white border border-line rounded-2xl p-5">
+    <div class="text-sm font-semibold text-ink/50 mb-3">{{ t.an_week }}</div>
+    <div class="flex gap-8">
+      <div>
+        <div class="text-xs text-ink/50">{{ t.an_orders }}</div>
+        <div class="text-2xl font-bold tabular-nums">{{ week_count }}</div>
+      </div>
+      <div>
+        <div class="text-xs text-ink/50">{{ t.an_revenue }}</div>
+        <div class="text-2xl font-bold tabular-nums">{{ week_rev }} <span class="text-xs text-ink/40 font-normal">{{ t.an_som }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- топ блюд -->
+  <div class="bg-white border border-line rounded-2xl p-5">
+    <div class="text-sm font-semibold text-ink/50 mb-3">{{ t.an_top }}</div>
+    {% if top %}
+    <div class="space-y-2">
+      {% for d in top %}
+      <div class="flex items-center gap-3">
+        <span class="w-5 text-ink/30 text-sm font-semibold">{{ forloop.counter }}</span>
+        <span class="flex-1 min-w-0 truncate text-sm">{{ d.name }}</span>
+        <span class="text-xs text-ink/50 tabular-nums">{{ d.qty }} {{ t.an_qty }}</span>
+        <span class="text-sm font-semibold tabular-nums w-28 text-right">{{ d.rev_display }} <span class="text-[11px] text-ink/40 font-normal">{{ t.an_som }}</span></span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-sm text-ink/40 py-4">{{ t.an_no_data }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<p class="text-xs text-ink/40 mt-5">{{ t.an_note }}</p>
+{% endblock %}

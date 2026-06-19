@@ -2,11 +2,14 @@
 {% block heading %}{{ t.ord_title }}{% endblock %}
 {% block subheading %}{{ t.ord_subtitle }}{% endblock %}
 {% block content %}
-<!-- доска заказов: загрузка сразу + опрос каждые 6с -->
-<div id="board"
-     hx-get="{% url 'orders:feed' restaurant.slug %}"
-     hx-trigger="load, every 6s"
-     hx-swap="innerHTML">
-  <div class="text-ink/40 text-sm">…</div>
+<!-- realtime: WebSocket пушит обновления (OOB-swap по #board);
+     HTTP-загрузка даёт мгновенный старт, every 20s — резерв на случай обрыва WS -->
+<div hx-ext="ws" ws-connect="/ws/cabinet/{{ restaurant.slug }}/orders/">
+  <div id="board"
+       hx-get="{% url 'orders:feed' restaurant.slug %}"
+       hx-trigger="load, every 20s"
+       hx-swap="innerHTML">
+    <div class="text-ink/40 text-sm">…</div>
+  </div>
 </div>
 {% endblock %}

@@ -35,7 +35,7 @@ class UserChangeForm(forms.ModelForm):
     class Meta:
         model = User
         fields = (
-            'phone', 'full_name', 'password', 'is_active', 'is_staff',
+            'phone', 'full_name', 'plan', 'password', 'is_active', 'is_staff',
             'is_superuser', 'groups', 'user_permissions',
         )
 
@@ -46,8 +46,9 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     model = User
 
-    list_display = ('phone', 'full_name', 'is_staff', 'is_active')
-    list_filter = ('is_staff', 'is_superuser', 'is_active')
+    list_display = ('phone', 'full_name', 'plan', 'is_staff', 'is_active')
+    list_filter = ('plan', 'is_staff', 'is_superuser', 'is_active')
+    list_editable = ('plan',)
     search_fields = ('phone', 'full_name')
     ordering = ('phone',)
     filter_horizontal = ('groups', 'user_permissions')
@@ -55,6 +56,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('phone', 'password')}),
         ('Личное', {'fields': ('full_name',)}),
+        ('Тариф', {'fields': ('plan',)}),
         ('Права', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Даты', {'fields': ('last_login', 'date_joined')}),
     )

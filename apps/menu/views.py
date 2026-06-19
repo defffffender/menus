@@ -105,10 +105,22 @@ def _has_price(request):
     return any((p or '').strip() for p in request.POST.getlist('v_price'))
 
 
+def _dish_limit_reached(restaurant):
+    """Достигнут ли лимит блюд тарифа владельца заведения."""
+    limit = restaurant.owner.dish_limit
+    if limit is None:
+        return False
+    return Dish.objects.filter(category__restaurant=restaurant).count() >= limit
+
+
 @login_required
 def dish_add(request, slug):
+    from apps.core.translations import tr
     restaurant = _get_restaurant(request, slug, perm='menu')
     if request.method == 'POST':
+        if _dish_limit_reached(restaurant):
+            messages.error(request, tr(request, 'plan_limit_dishes'))
+            return redirect('menu:menu', slug=slug)
         form = DishForm(request.POST, request.FILES, restaurant=restaurant)
         if form.is_valid() and _has_price(request):
             dish = form.save()
@@ -118,6 +130,9 @@ def dish_add(request, slug):
         if not _has_price(request):
             messages.error(request, 'Укажите хотя бы одну цену')
     else:
+        if _dish_limit_reached(restaurant):
+            messages.error(request, tr(request, 'plan_limit_dishes'))
+            return redirect('menu:menu', slug=slug)
         form = DishForm(restaurant=restaurant)
     ctx = _shell(request, restaurant, 'menu')
     ctx['form'] = form

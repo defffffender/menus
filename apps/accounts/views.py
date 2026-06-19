@@ -6,23 +6,33 @@ from apps.core.translations import tr
 from apps.restaurants.models import Membership, Restaurant
 from apps.restaurants.utils import unique_slug
 
-from .models import User, normalize_phone
+from .models import User, is_valid_uz_phone, normalize_phone
 from .services import issue_otp, verify_otp
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
 
 def register(request):
+    # уже вошёл — новое заведение добавляется из кабинета, не через регистрацию
+    if request.user.is_authenticated:
+        return redirect('restaurants:cabinet')
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         rtype = request.POST.get('type', '').strip() or Restaurant.Type.RESTAURANT
         city = request.POST.get('city', '').strip()
         phone = request.POST.get('phone', '').strip()
+        nphone = normalize_phone(phone)
         if not name or not phone:
             messages.error(request, tr(request, 'err_required'))
+        elif not is_valid_uz_phone(phone):
+            messages.error(request, tr(request, 'err_phone_uz'))
+        elif User.objects.filter(phone=nphone).exists():
+            # один номер — один аккаунт; новые заведения добавляются в кабинете
+            messages.error(request, tr(request, 'reg_exists'))
+            return redirect('accounts:login')
         else:
             request.session['reg_data'] = {'name': name, 'type': rtype, 'city': city, 'phone': phone}
-            request.session['otp_phone'] = normalize_phone(phone)
+            request.session['otp_phone'] = nphone
             request.session['otp_mode'] = 'register'
             issue_otp(phone)
             messages.success(request, tr(request, 'msg_code_sent'))
@@ -31,10 +41,14 @@ def register(request):
 
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('restaurants:cabinet')
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
         nphone = normalize_phone(phone)
-        if not User.objects.filter(phone=nphone).exists():
+        if not is_valid_uz_phone(phone):
+            messages.error(request, tr(request, 'err_phone_uz'))
+        elif not User.objects.filter(phone=nphone).exists():
             messages.error(request, tr(request, 'err_no_user'))
         else:
             request.session['otp_phone'] = nphone
@@ -46,6 +60,8 @@ def login_view(request):
 
 
 def verify(request):
+    if request.user.is_authenticated:
+        return redirect('restaurants:cabinet')
     phone = request.session.get('otp_phone')
     mode = request.session.get('otp_mode')
     if not phone or not mode:

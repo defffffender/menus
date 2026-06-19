@@ -5,7 +5,12 @@
   <h1 class="font-display text-3xl font-semibold mb-1">{{ t.cab_welcome }}</h1>
   <p class="text-ink/50 mb-8">{{ user.full_name|default:user.phone }}</p>
 
-  <h2 class="text-sm font-semibold uppercase tracking-wider text-ink/40 mb-3">{{ t.cab_your_venues }}</h2>
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold uppercase tracking-wider text-ink/40">{{ t.cab_your_venues }}</h2>
+    {% if can_create_venue %}
+    <a href="{% url 'restaurants:venue_create' %}" class="text-sm font-semibold text-brand">+ {{ t.venue_add }}</a>
+    {% endif %}
+  </div>
 
   {% if memberships %}
     <div class="grid sm:grid-cols-2 gap-4">

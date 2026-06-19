@@ -9,10 +9,10 @@ Role = Membership.Role
 
 # какие зоны доступны каждой роли
 ROLE_PERMS = {
-    Role.OWNER:         {'menu', 'tables', 'orders', 'staff'},
-    Role.DIRECTOR:      {'menu', 'tables', 'orders', 'staff'},
-    Role.ADMINISTRATOR: {'menu', 'tables', 'orders', 'staff'},  # сотрудники — частично (см. ранг)
-    Role.MANAGER:       {'menu', 'tables', 'orders'},
+    Role.OWNER:         {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings'},
+    Role.DIRECTOR:      {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings'},
+    Role.ADMINISTRATOR: {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings'},  # staff — частично (см. ранг)
+    Role.MANAGER:       {'menu', 'tables', 'orders', 'analytics'},
     Role.WAITER:        {'orders'},
     Role.KITCHEN:       {'orders'},
 }
@@ -36,6 +36,20 @@ def membership_for(user, restaurant):
         .filter(user=user, restaurant=restaurant, is_active=True)
         .first()
     )
+
+
+def owns_any_venue(user):
+    """Является ли пользователь владельцем хотя бы одного заведения.
+
+    Только владельцы могут создавать ещё заведения. Сотрудник (официант,
+    кухня, менеджер и т.п.), которого пригласили, владельцем не становится
+    и новые заведения заводить не может.
+    """
+    if not getattr(user, 'is_authenticated', False):
+        return False
+    return Membership.objects.filter(
+        user=user, role=Role.OWNER, is_active=True,
+    ).exists()
 
 
 def can(membership, perm):

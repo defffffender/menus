@@ -180,6 +180,21 @@ TR = {
     'staff_err_phone':  {'ru': 'Введите корректный телефон', 'uz': 'Toʻgʻri telefon kiriting', 'en': 'Enter a valid phone'},
     'staff_err_role':   {'ru': 'Недопустимая роль', 'uz': 'Notoʻgʻri rol', 'en': 'Invalid role'},
     'staff_err_exists': {'ru': 'Этот сотрудник уже в заведении', 'uz': 'Bu xodim allaqachon muassasada', 'en': 'This member is already in the venue'},
+    'staff_venue':      {'ru': 'Заведение', 'uz': 'Muassasa', 'en': 'Venue'},
+    'staff_venues':     {'ru': 'Заведения', 'uz': 'Muassasalar', 'en': 'Venues'},
+    'staff_venues_hint': {'ru': 'Отметьте, куда добавить сотрудника', 'uz': 'Xodimni qayerga qoʻshishni belgilang', 'en': 'Choose where to add the member'},
+    'staff_err_venue':  {'ru': 'Нет прав привязывать сотрудников к этому заведению', 'uz': 'Bu muassasaga xodim biriktirishga ruxsat yoʻq', 'en': 'You cannot assign staff to this venue'},
+    'staff_err_no_venue': {'ru': 'Выберите хотя бы одно заведение', 'uz': 'Kamida bitta muassasa tanlang', 'en': 'Select at least one venue'},
+    'staff_added_n':    {'ru': 'Добавлено в заведений', 'uz': 'Muassasaga qoʻshildi', 'en': 'Added to venues'},
+
+    # тарифы / лимиты
+    'plan_label':       {'ru': 'Тариф', 'uz': 'Tarif', 'en': 'Plan'},
+    'plan_venues':      {'ru': 'Заведения', 'uz': 'Muassasalar', 'en': 'Venues'},
+    'plan_dishes':      {'ru': 'Блюда в заведении', 'uz': 'Muassasadagi taomlar', 'en': 'Dishes in venue'},
+    'plan_unlimited':   {'ru': 'без лимита', 'uz': 'cheksiz', 'en': 'unlimited'},
+    'plan_limit_venues': {'ru': 'Достигнут лимит заведений по тарифу. Обновите тариф, чтобы добавить ещё.', 'uz': 'Tarif boʻyicha muassasalar limiti tugadi. Yana qoʻshish uchun tarifni yangilang.', 'en': 'You’ve reached your plan’s venue limit. Upgrade to add more.'},
+    'plan_limit_dishes': {'ru': 'Достигнут лимит блюд по тарифу. Обновите тариф, чтобы добавить ещё.', 'uz': 'Tarif boʻyicha taomlar limiti tugadi. Yana qoʻshish uchun tarifni yangilang.', 'en': 'You’ve reached your plan’s dish limit. Upgrade to add more.'},
+    'plan_upgrade':     {'ru': 'Сменить тариф', 'uz': 'Tarifni oʻzgartirish', 'en': 'Change plan'},
 
     # статусы заказа
     'st_new':           {'ru': 'Новый', 'uz': 'Yangi', 'en': 'New'},
@@ -205,6 +220,36 @@ TR = {
     'ord_som':          {'ru': 'сум', 'uz': 'soʻm', 'en': 'soʻm'},
     'ord_comment':      {'ru': 'Комментарий', 'uz': 'Izoh', 'en': 'Comment'},
 
+    # аналитика
+    'an_title':         {'ru': 'Аналитика', 'uz': 'Tahlil', 'en': 'Analytics'},
+    'an_subtitle':      {'ru': 'Заказы и выручка заведения', 'uz': 'Buyurtmalar va tushum', 'en': 'Orders and revenue'},
+    'an_today':         {'ru': 'Сегодня', 'uz': 'Bugun', 'en': 'Today'},
+    'an_orders':        {'ru': 'Заказов', 'uz': 'Buyurtmalar', 'en': 'Orders'},
+    'an_revenue':       {'ru': 'Выручка', 'uz': 'Tushum', 'en': 'Revenue'},
+    'an_avg_check':     {'ru': 'Средний чек', 'uz': 'Oʻrtacha chek', 'en': 'Average check'},
+    'an_active_now':    {'ru': 'Активных сейчас', 'uz': 'Hozir faol', 'en': 'Active now'},
+    'an_week':          {'ru': 'За 7 дней', 'uz': '7 kun', 'en': 'Last 7 days'},
+    'an_top':           {'ru': 'Топ блюд за неделю', 'uz': 'Hafta xitlari', 'en': 'Top dishes (week)'},
+    'an_qty':           {'ru': 'шт', 'uz': 'dona', 'en': 'pcs'},
+    'an_som':           {'ru': 'сум', 'uz': 'soʻm', 'en': 'soʻm'},
+    'an_no_data':       {'ru': 'Пока нет данных — заказы появятся здесь', 'uz': 'Hozircha maʼlumot yoʻq', 'en': 'No data yet'},
+    'an_note':          {'ru': 'Выручка = сумма заказов (без отменённых). Оплату сервис не считает.', 'uz': 'Tushum = buyurtmalar summasi (bekorlarsiz).', 'en': 'Revenue = sum of orders (excl. cancelled).'},
+
+    # настройки заведения
+    'set_title':        {'ru': 'Настройки', 'uz': 'Sozlamalar', 'en': 'Settings'},
+    'set_subtitle':     {'ru': 'Профиль заведения', 'uz': 'Muassasa profili', 'en': 'Venue profile'},
+    'set_name':         {'ru': 'Название', 'uz': 'Nomi', 'en': 'Name'},
+    'set_type':         {'ru': 'Тип', 'uz': 'Turi', 'en': 'Type'},
+    'set_city':         {'ru': 'Город', 'uz': 'Shahar', 'en': 'City'},
+    'set_phone':        {'ru': 'Телефон', 'uz': 'Telefon', 'en': 'Phone'},
+    'set_logo':         {'ru': 'Логотип', 'uz': 'Logotip', 'en': 'Logo'},
+    'set_desc':         {'ru': 'Описание', 'uz': 'Tavsif', 'en': 'Description'},
+    'set_address':      {'ru': 'Адрес (slug)', 'uz': 'Manzil (slug)', 'en': 'Address (slug)'},
+    'set_address_hint': {'ru': 'Не меняется — на него завязаны ссылки кабинета', 'uz': 'Oʻzgarmaydi', 'en': 'Fixed — cabinet links depend on it'},
+    'set_save':         {'ru': 'Сохранить', 'uz': 'Saqlash', 'en': 'Save'},
+    'set_saved':        {'ru': 'Сохранено', 'uz': 'Saqlandi', 'en': 'Saved'},
+    'set_logo_current': {'ru': 'Текущий логотип', 'uz': 'Joriy logotip', 'en': 'Current logo'},
+
     # статус заказа (гость)
     'ost_title':        {'ru': 'Заказ принят', 'uz': 'Buyurtma qabul qilindi', 'en': 'Order placed'},
     'ost_number':       {'ru': 'Заказ', 'uz': 'Buyurtma', 'en': 'Order'},
@@ -216,11 +261,125 @@ TR = {
     'ost_new_order':    {'ru': 'Сделать ещё заказ', 'uz': 'Yana buyurtma berish', 'en': 'Place another order'},
     'ost_som':          {'ru': 'сум', 'uz': 'soʻm', 'en': 'soʻm'},
 
+    # добавление заведения (в кабинете)
+    'venue_add':        {'ru': 'Добавить заведение', 'uz': 'Muassasa qoʻshish', 'en': 'Add venue'},
+    'venue_new':        {'ru': 'Новое заведение', 'uz': 'Yangi muassasa', 'en': 'New venue'},
+    'venue_create_btn': {'ru': 'Создать заведение', 'uz': 'Muassasa yaratish', 'en': 'Create venue'},
+    'venue_created':    {'ru': 'Заведение создано', 'uz': 'Muassasa yaratildi', 'en': 'Venue created'},
+    'venue_back':       {'ru': '← К заведениям', 'uz': '← Muassasalarga', 'en': '← Back to venues'},
+
     # сообщения / ошибки
     'msg_code_sent':    {'ru': 'Код отправлен', 'uz': 'Kod yuborildi', 'en': 'Code sent'},
     'err_required':     {'ru': 'Заполните название и телефон', 'uz': 'Nom va telefonni toʻldiring', 'en': 'Fill in name and phone'},
+    'err_phone_uz':     {'ru': 'Введите номер в формате +998 XX XXX-XX-XX', 'uz': 'Raqamni +998 XX XXX-XX-XX koʻrinishida kiriting', 'en': 'Enter the number as +998 XX XXX-XX-XX'},
     'err_invalid_code': {'ru': 'Неверный или просроченный код', 'uz': 'Kod notoʻgʻri yoki muddati oʻtgan', 'en': 'Invalid or expired code'},
     'err_no_user':      {'ru': 'Заведение с таким номером не найдено', 'uz': 'Bu raqam topilmadi', 'en': 'No account with this number'},
+    'reg_exists':       {'ru': 'Этот номер уже зарегистрирован. Войдите, а новое заведение добавьте в кабинете.', 'uz': 'Bu raqam allaqachon roʻyxatda. Kiring va yangi muassasani kabinetda qoʻshing.', 'en': 'This number is already registered. Log in and add a new venue from the dashboard.'},
+
+    # ===== Лендинг (главная) =====
+    # навигация
+    'l_nav_features':   {'ru': 'Возможности', 'uz': 'Imkoniyatlar', 'en': 'Features'},
+    'l_nav_how':        {'ru': 'Как работает', 'uz': 'Qanday ishlaydi', 'en': 'How it works'},
+    'l_nav_pricing':    {'ru': 'Цены', 'uz': 'Narxlar', 'en': 'Pricing'},
+
+    # hero
+    'l_hero_badge':     {'ru': 'QR-меню для общепита Узбекистана', 'uz': 'Oʻzbekiston umumiy ovqatlanishi uchun QR-menyu', 'en': 'QR menu for Uzbekistan’s food service'},
+    'l_hero_h1':        {'ru': 'Меню, которое гость открывает', 'uz': 'Mehmon ochadigan menyu —', 'en': 'A menu your guest opens'},
+    'l_hero_h1_accent': {'ru': 'за один скан', 'uz': 'bitta skan bilan', 'en': 'in a single scan'},
+    'l_hero_sub':       {'ru': 'Гость наводит камеру на QR на столе — и заказывает сам, на родном языке. Вы управляете меню и заказами из одного кабинета. Без приложений и регистрации гостя.', 'uz': 'Mehmon stoldagi QR-ga kamerani toʻgʻrilaydi va oʻz tilida oʻzi buyurtma beradi. Siz menyu va buyurtmalarni bitta kabinetdan boshqarasiz. Ilovasiz va mehmonni roʻyxatdan oʻtkazmasdan.', 'en': 'A guest points the camera at the QR on the table and orders by themselves, in their own language. You manage menu and orders from one dashboard. No apps, no guest sign-up.'},
+    'l_hero_cta1':      {'ru': 'Подключить заведение', 'uz': 'Muassasani ulash', 'en': 'Connect your venue'},
+    'l_hero_cta2':      {'ru': 'Смотреть демо', 'uz': 'Demoni koʻrish', 'en': 'Watch demo'},
+    'l_stat_venues':    {'ru': 'заведений', 'uz': 'muassasa', 'en': 'venues'},
+    'l_stat_langs_num': {'ru': '3 языка', 'uz': '3 til', 'en': '3 languages'},
+    'l_stat_start':     {'ru': 'старт', 'uz': 'boshlash', 'en': 'to start'},
+
+    # phone mock
+    'l_mock_popular':   {'ru': 'Популярное', 'uz': 'Ommabop', 'en': 'Popular'},
+    'l_mock_hot':       {'ru': 'Горячее', 'uz': 'Issiq taomlar', 'en': 'Hot'},
+    'l_mock_cart':      {'ru': 'Корзина', 'uz': 'Savat', 'en': 'Cart'},
+    'l_mock_scan':      {'ru': 'СКАН', 'uz': 'SKAN', 'en': 'SCAN'},
+    'l_mock_table':     {'ru': 'СТОЛ', 'uz': 'STOL', 'en': 'TABLE'},
+
+    # features
+    'l_feat_kicker':    {'ru': 'Возможности', 'uz': 'Imkoniyatlar', 'en': 'Features'},
+    'l_feat_h2':        {'ru': 'Всё для меню и заказов — в одном месте', 'uz': 'Menyu va buyurtmalar uchun hammasi — bir joyda', 'en': 'Everything for menu and orders — in one place'},
+    'l_f1_t':           {'ru': 'QR на каждом столе', 'uz': 'Har bir stolda QR', 'en': 'QR on every table'},
+    'l_f1_d':           {'ru': 'Гость сканирует код и сразу видит меню своего стола. Без приложений, без регистрации, без официанта.', 'uz': 'Mehmon kodni skanerlaydi va oʻz stolining menyusini darhol koʻradi. Ilovasiz, roʻyxatsiz, ofitsiantsiz.', 'en': 'The guest scans the code and instantly sees the menu for their table. No apps, no sign-up, no waiter.'},
+    'l_f2_t':           {'ru': 'Три языка из коробки', 'uz': 'Uchta til standart', 'en': 'Three languages out of the box'},
+    'l_f2_d':           {'ru': 'Русский, узбекский (латиница) и английский. Гость выбирает язык — меню переключается целиком.', 'uz': 'Rus, oʻzbek (lotin) va ingliz. Mehmon tilni tanlaydi — menyu toʻliq almashadi.', 'en': 'Russian, Uzbek (Latin) and English. The guest picks a language and the whole menu switches.'},
+    'l_f3_t':           {'ru': 'Цены в сумах', 'uz': 'Narxlar soʻmda', 'en': 'Prices in soʻm'},
+    'l_f3_d':           {'ru': 'Крупные читаемые числа в формате «45 000 so‘m». Скидки, стоп-листы и веса порций.', 'uz': '«45 000 so‘m» koʻrinishidagi yirik, oʻqilishi oson raqamlar. Chegirmalar, stop-listlar va porsiya vaznlari.', 'en': 'Large, readable numbers like “45 000 so‘m”. Discounts, stop-lists and portion weights.'},
+    'l_f4_t':           {'ru': 'Меню без программиста', 'uz': 'Dasturchisiz menyu', 'en': 'Menu without a developer'},
+    'l_f4_d':           {'ru': 'Добавляйте блюда, фото и цены сами. Перетаскивайте порядок, включайте и выключайте позиции в один клик.', 'uz': 'Taom, surat va narxlarni oʻzingiz qoʻshing. Tartibni surib oʻzgartiring, pozitsiyalarni bir bosishda yoqing va oʻchiring.', 'en': 'Add dishes, photos and prices yourself. Drag to reorder, toggle items on and off in one click.'},
+    'l_f5_t':           {'ru': 'Заказы в реальном времени', 'uz': 'Real vaqtda buyurtmalar', 'en': 'Real-time orders'},
+    'l_f5_d':           {'ru': 'Новые заказы прилетают на кухню мгновенно. Статусы «принят → готовится → готово → подано».', 'uz': 'Yangi buyurtmalar oshxonaga bir zumda tushadi. Holatlar: «qabul qilindi → tayyorlanmoqda → tayyor → berildi».', 'en': 'New orders reach the kitchen instantly. Statuses: “accepted → cooking → ready → served”.'},
+    'l_f6_t':           {'ru': 'Аналитика продаж', 'uz': 'Sotuv tahlili', 'en': 'Sales analytics'},
+    'l_f6_d':           {'ru': 'Выручка, средний чек, хиты и аутсайдеры меню. Понимайте, что заказывают и что стоит убрать.', 'uz': 'Tushum, oʻrtacha chek, menyu xitlari va autsayderlari. Nima buyurtma qilinayotganini va nimani olib tashlash kerakligini tushuning.', 'en': 'Revenue, average check, bestsellers and weak items. See what’s ordered and what to drop.'},
+
+    # how it works
+    'l_how_kicker':     {'ru': 'Как это работает', 'uz': 'Qanday ishlaydi', 'en': 'How it works'},
+    'l_how_h2':         {'ru': 'Запуск за 5 минут', 'uz': '5 daqiqada ishga tushirish', 'en': 'Launch in 5 minutes'},
+    'l_how1_t':         {'ru': 'Зарегистрируйте заведение', 'uz': 'Muassasani roʻyxatdan oʻtkazing', 'en': 'Register your venue'},
+    'l_how1_d':         {'ru': 'Название, тип, город и телефон. Кабинет готов сразу — без договоров и оборудования.', 'uz': 'Nom, tur, shahar va telefon. Kabinet darhol tayyor — shartnoma va jihozsiz.', 'en': 'Name, type, city and phone. The dashboard is ready at once — no contracts or hardware.'},
+    'l_how2_t':         {'ru': 'Добавьте меню', 'uz': 'Menyu qoʻshing', 'en': 'Add your menu'},
+    'l_how2_d':         {'ru': 'Блюда, фото и цены на трёх языках. Можно импортировать готовый список одним файлом.', 'uz': 'Taom, surat va narxlar uch tilda. Tayyor roʻyxatni bitta fayl bilan import qilish mumkin.', 'en': 'Dishes, photos and prices in three languages. You can import a ready list with a single file.'},
+    'l_how3_t':         {'ru': 'Распечатайте QR на столы', 'uz': 'Stollarga QR chop eting', 'en': 'Print QR for tables'},
+    'l_how3_d':         {'ru': 'Скачайте готовые таблички с QR для каждого стола — и принимайте первые заказы.', 'uz': 'Har bir stol uchun tayyor QR-jadvalchalarni yuklab oling va birinchi buyurtmalarni qabul qiling.', 'en': 'Download ready QR table-tents for each table — and start taking your first orders.'},
+
+    # pricing
+    'l_price_kicker':   {'ru': 'Цены', 'uz': 'Narxlar', 'en': 'Pricing'},
+    'l_price_h2':       {'ru': 'Прозрачно, в сумах, без комиссии с заказов', 'uz': 'Shaffof, soʻmda, buyurtmalardan komissiyasiz', 'en': 'Transparent, in soʻm, no fees on orders'},
+    'l_per_month':      {'ru': 'so‘m / мес', 'uz': 'so‘m / oyiga', 'en': 'so‘m / mo'},
+    'l_plan_start':     {'ru': 'Старт', 'uz': 'Boshlangʻich', 'en': 'Start'},
+    'l_plan_start_sub': {'ru': 'Для одной точки', 'uz': 'Bitta nuqta uchun', 'en': 'For a single venue'},
+    'l_plan_start_f1':  {'ru': '1 заведение', 'uz': '1 muassasa', 'en': '1 venue'},
+    'l_plan_start_f2':  {'ru': 'До 30 блюд', 'uz': '30 tagacha taom', 'en': 'Up to 30 dishes'},
+    'l_plan_start_f3':  {'ru': 'QR-меню, 3 языка', 'uz': 'QR-menyu, 3 til', 'en': 'QR menu, 3 languages'},
+    'l_plan_start_f4':  {'ru': 'Приём заказов', 'uz': 'Buyurtma qabul qilish', 'en': 'Order taking'},
+    'l_plan_start_cta': {'ru': 'Начать бесплатно', 'uz': 'Bepul boshlash', 'en': 'Start free'},
+    'l_plan_popular':   {'ru': 'Популярный', 'uz': 'Ommabop', 'en': 'Popular'},
+    'l_plan_pro':       {'ru': 'Бизнес', 'uz': 'Biznes', 'en': 'Business'},
+    'l_plan_pro_sub':   {'ru': 'Для активной точки', 'uz': 'Faol nuqta uchun', 'en': 'For a busy venue'},
+    'l_plan_pro_f1':    {'ru': 'До 3 заведений', 'uz': '3 tagacha muassasa', 'en': 'Up to 3 venues'},
+    'l_plan_pro_f2':    {'ru': 'Безлимит блюд', 'uz': 'Cheksiz taom', 'en': 'Unlimited dishes'},
+    'l_plan_pro_f3':    {'ru': 'Аналитика и отчёты', 'uz': 'Tahlil va hisobotlar', 'en': 'Analytics and reports'},
+    'l_plan_pro_f4':    {'ru': 'Стоп-листы, акции', 'uz': 'Stop-listlar, aksiyalar', 'en': 'Stop-lists, promos'},
+    'l_plan_pro_f5':    {'ru': 'Поддержка в Telegram', 'uz': 'Telegram orqali qoʻllab-quvvatlash', 'en': 'Telegram support'},
+    'l_plan_pro_cta':   {'ru': 'Попробовать 14 дней', 'uz': '14 kun sinab koʻrish', 'en': 'Try 14 days'},
+    'l_plan_net':       {'ru': 'Сеть', 'uz': 'Tarmoq', 'en': 'Network'},
+    'l_plan_net_sub':   {'ru': 'Для сетей и франшиз', 'uz': 'Tarmoq va franshizalar uchun', 'en': 'For chains and franchises'},
+    'l_plan_net_price': {'ru': 'Договорная', 'uz': 'Kelishuv asosida', 'en': 'Custom'},
+    'l_plan_net_f1':    {'ru': 'Безлимит точек', 'uz': 'Cheksiz nuqtalar', 'en': 'Unlimited venues'},
+    'l_plan_net_f2':    {'ru': 'Роли и права персонала', 'uz': 'Xodimlar rollari va huquqlari', 'en': 'Staff roles and permissions'},
+    'l_plan_net_f3':    {'ru': 'Единое меню сети', 'uz': 'Yagona tarmoq menyusi', 'en': 'Unified network menu'},
+    'l_plan_net_f4':    {'ru': 'Интеграции и API', 'uz': 'Integratsiyalar va API', 'en': 'Integrations and API'},
+    'l_plan_net_cta':   {'ru': 'Связаться с нами', 'uz': 'Biz bilan bogʻlanish', 'en': 'Contact us'},
+
+    # registration block
+    'l_reg_h2':         {'ru': 'Подключите заведение', 'uz': 'Muassasani ulang', 'en': 'Connect your venue'},
+    'l_reg_h2_accent':  {'ru': 'за 5 минут', 'uz': '5 daqiqada', 'en': 'in 5 minutes'},
+    'l_reg_p':          {'ru': 'Заполните короткую форму — и сразу попадёте в кабинет, где можно добавить меню и получить QR-коды для столов.', 'uz': 'Qisqa shaklni toʻldiring — va darhol kabinetga oʻtasiz, u yerda menyu qoʻshib, stollar uchun QR-kodlar olishingiz mumkin.', 'en': 'Fill in a short form — and land straight in the dashboard, where you can add a menu and get QR codes for tables.'},
+    'l_reg_b1_t':       {'ru': 'Бесплатный тариф навсегда', 'uz': 'Abadiy bepul tarif', 'en': 'Free plan forever'},
+    'l_reg_b1_d':       {'ru': 'Карта не нужна, оборудование не нужно.', 'uz': 'Karta kerak emas, jihoz kerak emas.', 'en': 'No card needed, no hardware needed.'},
+    'l_reg_b2_t':       {'ru': 'Поможем перенести меню', 'uz': 'Menyuni koʻchirishga yordam beramiz', 'en': 'We’ll help move your menu'},
+    'l_reg_b2_d':       {'ru': 'Пришлите фото бумажного меню — заполним за вас.', 'uz': 'Qogʻoz menyu suratini yuboring — siz uchun toʻldiramiz.', 'en': 'Send a photo of your paper menu — we’ll fill it in for you.'},
+    'l_reg_b3_t':       {'ru': 'Поддержка на русском и узбекском', 'uz': 'Rus va oʻzbek tilida qoʻllab-quvvatlash', 'en': 'Support in Russian and Uzbek'},
+    'l_reg_b3_d':       {'ru': 'Отвечаем в Telegram в течение часа.', 'uz': 'Telegramda bir soat ichida javob beramiz.', 'en': 'We reply on Telegram within an hour.'},
+    'l_reg_step':       {'ru': 'Шаг 1 / 2', 'uz': 'Qadam 1 / 2', 'en': 'Step 1 / 2'},
+    'l_reg_agree':      {'ru': 'Соглашаюсь с условиями и политикой данных.', 'uz': 'Shartlar va maʼlumotlar siyosatiga roziman.', 'en': 'I agree to the terms and data policy.'},
+    'l_reg_submit':     {'ru': 'Создать кабинет →', 'uz': 'Kabinet yaratish →', 'en': 'Create dashboard →'},
+    'l_reg_city_ph':    {'ru': 'Ташкент', 'uz': 'Toshkent', 'en': 'Tashkent'},
+
+    # footer
+    'l_foot_tagline':   {'ru': 'QR-меню и приём заказов для ресторанов, кафе и чайхан Узбекистана.', 'uz': 'Oʻzbekiston restoran, kafe va choyxonalari uchun QR-menyu va buyurtma qabul qilish.', 'en': 'QR menu and order taking for restaurants, cafes and chaikhanas of Uzbekistan.'},
+    'l_foot_product':   {'ru': 'Продукт', 'uz': 'Mahsulot', 'en': 'Product'},
+    'l_foot_support':   {'ru': 'Поддержка', 'uz': 'Qoʻllab-quvvatlash', 'en': 'Support'},
+    'l_foot_lang':      {'ru': 'Язык', 'uz': 'Til', 'en': 'Language'},
+    'l_foot_demo':      {'ru': 'Демо-меню', 'uz': 'Demo menyu', 'en': 'Demo menu'},
+    'l_foot_help':      {'ru': 'Помощь', 'uz': 'Yordam', 'en': 'Help'},
+    'l_foot_contacts':  {'ru': 'Контакты', 'uz': 'Kontaktlar', 'en': 'Contacts'},
+    'l_foot_copy':      {'ru': '© 2026 Menus. Ташкент, Узбекистан.', 'uz': '© 2026 Menus. Toshkent, Oʻzbekiston.', 'en': '© 2026 Menus. Tashkent, Uzbekistan.'},
+    'l_foot_made':      {'ru': 'Сделано для общепита Узбекистана', 'uz': 'Oʻzbekiston umumiy ovqatlanishi uchun', 'en': 'Made for Uzbekistan’s food service'},
 }
 
 
@@ -240,3 +399,18 @@ def tr(request, key):
 def resolve_lang(request):
     lang = request.session.get('lang', DEFAULT_LANG)
     return lang if lang in dict(LANGUAGES) else DEFAULT_LANG
+
+
+def normalize_lang(lang):
+    return lang if lang in dict(LANGUAGES) else DEFAULT_LANG
+
+
+def flat(lang):
+    """Плоский словарь переводов для шаблонов: {{ t.key }}."""
+    return {key: entry.get(lang) or entry.get(DEFAULT_LANG) or key for key, entry in TR.items()}
+
+
+def i18n_context(lang):
+    """Контекст i18n без request (для render_to_string в consumer'ах)."""
+    lang = normalize_lang(lang)
+    return {'LANG': lang, 'LANGUAGES': LANGUAGES, 't': flat(lang)}

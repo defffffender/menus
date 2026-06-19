@@ -1,28 +1,51 @@
 
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Конфиг из окружения (12-factor). Значения по умолчанию — для разработки;
+# на проде задаются через .env / переменные окружения.
+env = environ.Env(
+    DEBUG=(bool, True),
+    SECRET_KEY=(str, 'django-insecure-%!6h5t86lo0f&0o1_i@i=$2g*wu%86ba_n-a6^+*%$qcqzx!1y'),
+    ALLOWED_HOSTS=(list, []),
+    CSRF_TRUSTED_ORIGINS=(list, []),
+    REDIS_URL=(str, ''),
+)
+# .env читаем, если есть (на проде); в dev можно без файла.
+environ.Env.read_env(BASE_DIR / '.env')
+
+DEBUG = env('DEBUG')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%!6h5t86lo0f&0o1_i@i=$2g*wu%86ba_n-a6^+*%$qcqzx!1y'
+SECRET_KEY = env('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# В разработке разрешаем любой хост (чтобы открыть с телефона по IP в той же
+# Wi-Fi-сети). На проде ALLOWED_HOSTS задаётся явно через окружение.
+ALLOWED_HOSTS = ['*'] if DEBUG else env('ALLOWED_HOSTS')
 
-ALLOWED_HOSTS = []
+# Для WS/POST через HTTPS с домена (прод): https://menu.example.uz
+CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # daphne должен быть выше staticfiles — даёт ASGI-runserver (WebSocket в dev)
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # realtime
+    'channels',
 
     # local apps
     'apps.core',
@@ -65,6 +88,21 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'menus.wsgi.application'
+ASGI_APPLICATION = 'menus.asgi.application'
+
+# Channel layer: на проде — Redis (общие WS-группы между воркерами/серверами),
+# в разработке — InMemory (без внешних сервисов, один процесс).
+if env('REDIS_URL'):
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {'hosts': [env('REDIS_URL')]},
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'},
+    }
 
 
 # Database

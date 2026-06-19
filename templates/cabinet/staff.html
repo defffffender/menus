@@ -10,9 +10,24 @@
     {% if assignable %}
     <form method="post" action="{% url 'restaurants:staff' restaurant.slug %}" class="space-y-3">
       {% csrf_token %}
+      {% if show_venue_picker %}
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1">{{ t.staff_venues }}</label>
+        <p class="text-[11px] text-ink/40 mb-2">{{ t.staff_venues_hint }}</p>
+        <div class="space-y-1.5 max-h-44 overflow-auto pr-1">
+          {% for v in venue_choices %}
+          <label class="flex items-center gap-2.5 border border-line rounded-xl px-3 py-2 cursor-pointer hover:border-brand/50">
+            <input type="checkbox" name="venues" value="{{ v.slug }}" {% if v.id == restaurant.id %}checked{% endif %}
+                   class="w-4 h-4 accent-[#C75B39]">
+            <span class="text-sm font-medium truncate">{{ v.name }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
       <div>
         <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.staff_phone }}</label>
-        <input name="phone" required placeholder="+998 90 123 45 67"
+        <input name="phone" required data-phone-mask inputmode="tel" maxlength="19" placeholder="+998 90 123-45-67"
                class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
       </div>
       <div>
@@ -76,4 +91,5 @@
     </div>
   </div>
 </div>
+{% include 'partials/phone_mask.html' %}
 {% endblock %}

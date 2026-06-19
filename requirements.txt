@@ -1,0 +1,16 @@
+# Прямые зависимости проекта Menus.
+# Установка: pip install -r requirements.txt
+Django==5.2.15
+pillow==12.2.0
+qrcode==8.2
+
+# Конфиг из окружения (12-factor)
+django-environ==0.14.0
+
+# Realtime (WebSocket) — Channels + ASGI-сервер
+channels==4.3.2
+daphne==4.2.2
+channels-redis==4.3.0   # channel layer для прода (dev — InMemory)
+
+# Этап 7 (добавим по ходу): celery, psycopg[binary], django-storages[s3],
+# whitenoise, gunicorn/uvicorn, pgbouncer (внешний).

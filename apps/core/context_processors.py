@@ -1,11 +1,6 @@
-from .translations import LANGUAGES, TR, resolve_lang
+from .translations import i18n_context, resolve_lang
 
 
 def i18n(request):
-    lang = resolve_lang(request)
-    return {
-        'LANG': lang,
-        'LANGUAGES': LANGUAGES,
-        # плоский словарь для шаблонов: {{ t.reg_title }}
-        't': {key: entry.get(lang) or entry.get('ru') or key for key, entry in TR.items()},
-    }
+    # {{ t.key }}, {{ LANG }}, {{ LANGUAGES }} в шаблонах
+    return i18n_context(resolve_lang(request))

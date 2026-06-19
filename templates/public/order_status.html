@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
 <script>
   tailwind.config = { theme: { extend: {
     colors: { brand:'#C75B39', sand:'#FBF6EE', ink:'#2A2118', clay:'#E0A04D', forest:'#3E5C4A', line:'#ECE3D5' },
@@ -22,7 +23,7 @@
     {% if table %}<span class="text-xs bg-white/20 rounded-full px-3 py-1 flex-none">{{ t.ost_number }} № {{ order.pk }}</span>{% endif %}
   </header>
 
-  <main class="px-4 py-6 max-w-md mx-auto">
+  <main class="px-4 py-6 max-w-md mx-auto" hx-ext="ws" ws-connect="/ws/o/{{ order.public_token }}/">
     <div class="text-center mb-6">
       <div class="text-4xl mb-2">✅</div>
       <h1 class="font-display text-2xl font-semibold">{{ t.ost_title }}</h1>
@@ -30,7 +31,8 @@
     </div>
 
     <div class="bg-white border border-line rounded-2xl p-5 mb-4">
-      {% include 'public/_order_status.html' %}
+      <!-- статус обновляется через WebSocket (OOB-swap по #order-status) -->
+      <div id="order-status">{% include 'public/_order_status_inner.html' %}</div>
 
       <div class="border-t border-line pt-3 space-y-1.5">
         {% for item in order.items.all %}

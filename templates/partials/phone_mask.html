@@ -1,0 +1,23 @@
+{% comment %}Маска ввода узбекского номера: +998 XX XXX-XX-XX (макс 9 цифр после 998).
+Применяется ко всем input[data-phone-mask] на странице.{% endcomment %}
+<script>
+(function () {
+  function fmt(raw) {
+    var d = (raw || '').replace(/\D/g, '');
+    if (d.indexOf('998') === 0) d = d.slice(3);
+    d = d.slice(0, 9);
+    var out = '+998';
+    if (d.length > 0) out += ' ' + d.slice(0, 2);
+    if (d.length > 2) out += ' ' + d.slice(2, 5);
+    if (d.length > 5) out += '-' + d.slice(5, 7);
+    if (d.length > 7) out += '-' + d.slice(7, 9);
+    return out;
+  }
+  function attach(el) {
+    if (!el.value.trim()) el.value = '+998 ';
+    el.addEventListener('focus', function () { if (!el.value.trim()) el.value = '+998 '; });
+    el.addEventListener('input', function () { el.value = fmt(el.value); });
+  }
+  document.querySelectorAll('input[data-phone-mask]').forEach(attach);
+})();
+</script>

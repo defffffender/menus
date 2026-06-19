@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
   // HTMX → отправлять CSRF-токен из cookie со всеми не-GET запросами
@@ -23,7 +24,21 @@
     fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'], mono:['JetBrains Mono','monospace'] }
   } } }
 </script>
-<style>[x-cloak]{display:none!important}</style>
+<style>
+  [x-cloak]{display:none!important}
+  /* по умолчанию обычная стрелка — никакого I-beam на тексте интерфейса */
+  body{cursor:default}
+  /* текстовый курсор только в полях ввода */
+  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text}
+  /* «рука» — на кликабельном */
+  a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer}
+  /* плавные переходы для интерактива */
+  a,button,select,input,textarea,.transition{transition:background-color .18s,border-color .18s,color .18s,box-shadow .18s,transform .18s,opacity .18s;transition-timing-function:cubic-bezier(.4,0,.2,1)}
+  /* мягкое появление контента */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  main>*{animation:fadeUp .35s cubic-bezier(.4,0,.2,1)}
+  html{scroll-behavior:smooth}
+</style>
 {% block extra_head %}{% endblock %}
 </head>
 <body class="font-body bg-sand text-ink">
@@ -31,17 +46,42 @@
 
   <!-- SIDEBAR -->
   <aside class="w-60 flex-none bg-night text-[#C2B6A2] flex flex-col p-4">
-    <a href="/" class="flex items-center gap-3 px-2 pb-5">
+    <a href="{% url 'restaurants:dashboard' restaurant.slug %}" class="flex items-center gap-3 px-2 pb-5">
       <span class="font-display text-2xl font-semibold text-sand">Menus</span>
     </a>
 
-    <!-- venue -->
-    <div class="bg-night2 border border-[#3D3120] rounded-xl p-2.5 flex items-center gap-2.5 mb-4">
-      <span class="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-display font-semibold flex-none">{{ restaurant.name|first }}</span>
-      <div class="min-w-0">
-        <div class="text-[13px] font-semibold text-sand truncate">{{ restaurant.name }}</div>
-        <div class="text-[11px] text-[#9A8C78] truncate">{{ restaurant.get_type_display }}{% if restaurant.city %} · {{ restaurant.city }}{% endif %}</div>
+    <!-- venue switcher -->
+    <div class="mb-4" x-data="{ open: false }">
+      {% if can_switch_venue %}
+      <button @click="open = !open" class="w-full bg-night2 border border-[#3D3120] rounded-xl p-2.5 flex items-center gap-2.5 text-left hover:border-brand/50">
+        <span class="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-display font-semibold flex-none">{{ restaurant.name|first }}</span>
+        <div class="min-w-0 flex-1">
+          <div class="text-[13px] font-semibold text-sand truncate">{{ restaurant.name }}</div>
+          <div class="text-[11px] text-[#9A8C78] truncate">{{ restaurant.get_type_display }}{% if restaurant.city %} · {{ restaurant.city }}{% endif %}</div>
+        </div>
+        <span class="text-[#9A8C78] text-xs flex-none transition" :class="open && 'rotate-180'">▾</span>
+      </button>
+      <div x-show="open" x-cloak @click.outside="open = false"
+           x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+           class="mt-1 bg-night2 border border-[#3D3120] rounded-xl p-1">
+        {% for v in venues %}
+          {% if v.restaurant_id != restaurant.id %}
+          <a href="{% url 'restaurants:dashboard' v.restaurant.slug %}" class="block px-3 py-2 rounded-lg text-[13px] text-sand hover:bg-night truncate">{{ v.restaurant.name }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if can_create_venue %}
+        <a href="{% url 'restaurants:venue_create' %}" class="block px-3 py-2 rounded-lg text-[13px] font-semibold text-clay hover:bg-night">+ {{ t.venue_add }}</a>
+        {% endif %}
       </div>
+      {% else %}
+      <div class="w-full bg-night2 border border-[#3D3120] rounded-xl p-2.5 flex items-center gap-2.5">
+        <span class="w-8 h-8 rounded-lg bg-brand text-white flex items-center justify-center font-display font-semibold flex-none">{{ restaurant.name|first }}</span>
+        <div class="min-w-0 flex-1">
+          <div class="text-[13px] font-semibold text-sand truncate">{{ restaurant.name }}</div>
+          <div class="text-[11px] text-[#9A8C78] truncate">{{ restaurant.get_type_display }}{% if restaurant.city %} · {{ restaurant.city }}{% endif %}</div>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
     {% with base='inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full' %}
@@ -60,8 +100,12 @@
       {% if 'staff' in perms %}
       <a href="{% url 'restaurants:staff' restaurant.slug %}" class="{{ base }} {% if active == 'staff' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_staff }}</a>
       {% endif %}
-      <span class="{{ base }} opacity-40 cursor-default">{{ t.nav_analytics }} <span class="ml-auto text-[10px] font-mono">{{ t.soon }}</span></span>
-      <span class="{{ base }} opacity-40 cursor-default">{{ t.nav_settings }} <span class="ml-auto text-[10px] font-mono">{{ t.soon }}</span></span>
+      {% if 'analytics' in perms %}
+      <a href="{% url 'restaurants:analytics' restaurant.slug %}" class="{{ base }} {% if active == 'analytics' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_analytics }}</a>
+      {% endif %}
+      {% if 'settings' in perms %}
+      <a href="{% url 'restaurants:settings' restaurant.slug %}" class="{{ base }} {% if active == 'settings' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_settings }}</a>
+      {% endif %}
     </nav>
     {% endwith %}
 
