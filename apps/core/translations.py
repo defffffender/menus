@@ -102,6 +102,12 @@ TR = {
     'menu_save':        {'ru': 'Сохранить', 'uz': 'Saqlash', 'en': 'Save'},
     'menu_cancel':      {'ru': 'Отмена', 'uz': 'Bekor qilish', 'en': 'Cancel'},
     'menu_back':        {'ru': '← К меню', 'uz': '← Menyuga', 'en': '← Back to menu'},
+    'menu_add_dish_here': {'ru': 'Добавить блюдо', 'uz': 'Taom qoʻshish', 'en': 'Add dish'},
+    'menu_cat_created': {'ru': 'Категория создана', 'uz': 'Kategoriya yaratildi', 'en': 'Category created'},
+    'menu_dish_created': {'ru': 'Блюдо добавлено', 'uz': 'Taom qoʻshildi', 'en': 'Dish added'},
+    'menu_saved':       {'ru': 'Сохранено', 'uz': 'Saqlandi', 'en': 'Saved'},
+    'menu_deleted':     {'ru': 'Удалено', 'uz': 'Oʻchirildi', 'en': 'Deleted'},
+    'menu_need_price':  {'ru': 'Укажите хотя бы одну цену', 'uz': 'Kamida bitta narx kiriting', 'en': 'Enter at least one price'},
 
     # форма блюда
     'dish_new':         {'ru': 'Новое блюдо', 'uz': 'Yangi taom', 'en': 'New dish'},
@@ -234,6 +240,8 @@ TR = {
     'an_som':           {'ru': 'сум', 'uz': 'soʻm', 'en': 'soʻm'},
     'an_no_data':       {'ru': 'Пока нет данных — заказы появятся здесь', 'uz': 'Hozircha maʼlumot yoʻq', 'en': 'No data yet'},
     'an_note':          {'ru': 'Выручка = сумма заказов (без отменённых). Оплату сервис не считает.', 'uz': 'Tushum = buyurtmalar summasi (bekorlarsiz).', 'en': 'Revenue = sum of orders (excl. cancelled).'},
+    'an_dynamics':      {'ru': 'Динамика за 7 дней', 'uz': '7 kunlik dinamika', 'en': '7-day dynamics'},
+    'an_top_chart':     {'ru': 'Топ блюд (шт)', 'uz': 'Top taomlar (dona)', 'en': 'Top dishes (pcs)'},
 
     # настройки заведения
     'set_title':        {'ru': 'Настройки', 'uz': 'Sozlamalar', 'en': 'Settings'},

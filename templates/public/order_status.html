@@ -16,6 +16,12 @@
     fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'] }
   } } }
 </script>
+<style>
+  *{cursor:default!important}
+  body{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text!important;-webkit-user-select:text;-moz-user-select:text;user-select:text}
+  a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer!important}
+</style>
 </head>
 <body class="font-body bg-sand text-ink min-h-screen">
   <header class="bg-brand text-white px-5 py-4 flex items-center justify-between">
@@ -27,7 +33,7 @@
     <div class="text-center mb-6">
       <div class="text-4xl mb-2">✅</div>
       <h1 class="font-display text-2xl font-semibold">{{ t.ost_title }}</h1>
-      <p class="text-ink/50 text-sm mt-1">{{ t.ost_number }} № {{ order.pk }}{% if table %} · {{ t.pub_table }} {{ table.name }}{% endif %}</p>
+      <p class="text-ink/50 text-sm mt-1">{{ t.ost_number }} № {{ order.pk }}{% if table %} · {{ table.name }}{% endif %}</p>
     </div>
 
     <div class="bg-white border border-line rounded-2xl p-5 mb-4">

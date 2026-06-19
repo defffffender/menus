@@ -26,12 +26,13 @@
 </script>
 <style>
   [x-cloak]{display:none!important}
-  /* по умолчанию обычная стрелка — никакого I-beam на тексте интерфейса */
-  body{cursor:default}
-  /* текстовый курсор только в полях ввода */
-  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text}
+  /* обычная стрелка + запрет выделения текста интерфейса — убирает I-beam во всех браузерах */
+  *{cursor:default!important}
+  body{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+  /* текстовый курсор и выделение — только в полях ввода */
+  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text!important;-webkit-user-select:text;-moz-user-select:text;user-select:text}
   /* «рука» — на кликабельном */
-  a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer}
+  a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer!important}
   /* плавные переходы для интерактива */
   a,button,select,input,textarea,.transition{transition:background-color .18s,border-color .18s,color .18s,box-shadow .18s,transform .18s,opacity .18s;transition-timing-function:cubic-bezier(.4,0,.2,1)}
   /* мягкое появление контента */
@@ -42,6 +43,28 @@
 {% block extra_head %}{% endblock %}
 </head>
 <body class="font-body bg-sand text-ink">
+
+{% if messages %}
+<div class="fixed top-5 right-5 z-[100] flex flex-col gap-2 w-80 max-w-[90vw]">
+  {% for m in messages %}
+  <div x-data="{ show: false }"
+       x-init="$nextTick(() => show = true); setTimeout(() => show = false, 2500)"
+       x-show="show"
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 translate-x-6"
+       x-transition:enter-end="opacity-100 translate-x-0"
+       x-transition:leave="transition ease-in duration-300"
+       x-transition:leave-start="opacity-100 translate-x-0"
+       x-transition:leave-end="opacity-0 translate-x-6"
+       @click="show = false"
+       class="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium shadow-lg border bg-white {% if m.tags == 'error' %}text-red-700 border-red-200{% else %}text-forest border-forest/20{% endif %}">
+    <span class="text-base leading-none">{% if m.tags == 'error' %}⚠{% else %}✓{% endif %}</span>
+    <span class="flex-1">{{ m }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <div class="flex min-h-screen">
 
   <!-- SIDEBAR -->
@@ -137,13 +160,6 @@
     </header>
 
     <main class="flex-1 min-h-0 overflow-auto p-7">
-      {% if messages %}
-        <div class="mb-5 space-y-2">
-          {% for m in messages %}
-          <div class="rounded-xl px-4 py-3 text-sm {% if m.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-forest/10 text-forest border border-forest/20{% endif %}">{{ m }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
       {% block content %}{% endblock %}
     </main>
   </div>

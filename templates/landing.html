@@ -14,8 +14,9 @@
   a{text-decoration:none;color:inherit}
   html{scroll-behavior:smooth}
   /* обычная стрелка по умолчанию (без I-beam на тексте), «рука» — на кликабельном */
-  body{cursor:default}
-  a,button{cursor:pointer}
+  *{cursor:default!important}
+  body{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+  a,button{cursor:pointer!important}
   /* плавные переходы и аккуратный hover */
   a,.btn,.card,.langpill a{transition:transform .2s cubic-bezier(.4,0,.2,1),box-shadow .2s,background-color .2s,color .2s,border-color .2s,opacity .2s}
   .btn:hover{transform:translateY(-2px)}

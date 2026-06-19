@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from apps.core.translations import tr
 from apps.restaurants.views import _get_restaurant, _shell
 
 from .forms import CategoryForm, DishForm
@@ -33,7 +34,7 @@ def category_add(request, slug):
             category = form.save(commit=False)
             category.restaurant = restaurant
             category.save()
-            messages.success(request, 'OK')
+            messages.success(request, tr(request, 'menu_cat_created'))
     return redirect('menu:menu', slug=slug)
 
 
@@ -45,6 +46,7 @@ def category_edit(request, slug, pk):
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
+            messages.success(request, tr(request, 'menu_saved'))
     return redirect('menu:menu', slug=slug)
 
 
@@ -54,6 +56,7 @@ def category_delete(request, slug, pk):
     category = get_object_or_404(Category, pk=pk, restaurant=restaurant)
     if request.method == 'POST':
         category.delete()
+        messages.success(request, tr(request, 'menu_deleted'))
     return redirect('menu:menu', slug=slug)
 
 
@@ -115,7 +118,6 @@ def _dish_limit_reached(restaurant):
 
 @login_required
 def dish_add(request, slug):
-    from apps.core.translations import tr
     restaurant = _get_restaurant(request, slug, perm='menu')
     if request.method == 'POST':
         if _dish_limit_reached(restaurant):
@@ -125,15 +127,20 @@ def dish_add(request, slug):
         if form.is_valid() and _has_price(request):
             dish = form.save()
             _save_variants(request, dish)
-            messages.success(request, 'Блюдо добавлено')
+            messages.success(request, tr(request, 'menu_dish_created'))
             return redirect('menu:menu', slug=slug)
         if not _has_price(request):
-            messages.error(request, 'Укажите хотя бы одну цену')
+            messages.error(request, tr(request, 'menu_need_price'))
     else:
         if _dish_limit_reached(restaurant):
             messages.error(request, tr(request, 'plan_limit_dishes'))
             return redirect('menu:menu', slug=slug)
-        form = DishForm(restaurant=restaurant)
+        # предвыбор категории при переходе «+ блюдо» из конкретной категории
+        initial = {}
+        cat_id = request.GET.get('category')
+        if cat_id and restaurant.categories.filter(pk=cat_id).exists():
+            initial['category'] = cat_id
+        form = DishForm(restaurant=restaurant, initial=initial)
     ctx = _shell(request, restaurant, 'menu')
     ctx['form'] = form
     ctx['categories'] = restaurant.categories.all()
@@ -150,10 +157,10 @@ def dish_edit(request, slug, pk):
         if form.is_valid() and _has_price(request):
             dish = form.save()
             _save_variants(request, dish)
-            messages.success(request, 'Сохранено')
+            messages.success(request, tr(request, 'menu_saved'))
             return redirect('menu:menu', slug=slug)
         if not _has_price(request):
-            messages.error(request, 'Укажите хотя бы одну цену')
+            messages.error(request, tr(request, 'menu_need_price'))
     else:
         form = DishForm(instance=dish, restaurant=restaurant)
     ctx = _shell(request, restaurant, 'menu')
@@ -170,6 +177,7 @@ def dish_delete(request, slug, pk):
     dish = get_object_or_404(Dish, pk=pk, category__restaurant=restaurant)
     if request.method == 'POST':
         dish.delete()
+        messages.success(request, tr(request, 'menu_deleted'))
     return redirect('menu:menu', slug=slug)
 
 

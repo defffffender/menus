@@ -1,7 +1,9 @@
 {% extends 'cabinet/base.html' %}
 {% block heading %}{{ t.an_title }}{% endblock %}
 {% block subheading %}{{ t.an_subtitle }}{% endblock %}
+{% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>{% endblock %}
 {% block content %}
+{{ chart|json_script:"an-data" }}
 
 <!-- KPI сегодня -->
 <div class="text-sm font-semibold text-ink/50 mb-2">{{ t.an_today }}</div>
@@ -24,6 +26,16 @@
   </div>
 </div>
 
+<!-- график динамики за 7 дней -->
+<div class="bg-white border border-line rounded-2xl p-5 mb-6">
+  <div class="text-sm font-semibold text-ink/50 mb-3">{{ t.an_dynamics }}</div>
+  {% if has_chart_data %}
+  <div class="h-64"><canvas id="dynChart"></canvas></div>
+  {% else %}
+  <div class="text-sm text-ink/40 py-8 text-center">{{ t.an_no_data }}</div>
+  {% endif %}
+</div>
+
 <div class="grid lg:grid-cols-2 gap-6 items-start">
   <!-- неделя -->
   <div class="bg-white border border-line rounded-2xl p-5">
@@ -44,6 +56,7 @@
   <div class="bg-white border border-line rounded-2xl p-5">
     <div class="text-sm font-semibold text-ink/50 mb-3">{{ t.an_top }}</div>
     {% if top %}
+    <div class="h-40 mb-4"><canvas id="topChart"></canvas></div>
     <div class="space-y-2">
       {% for d in top %}
       <div class="flex items-center gap-3">
@@ -61,4 +74,62 @@
 </div>
 
 <p class="text-xs text-ink/40 mt-5">{{ t.an_note }}</p>
+
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById('an-data').textContent);
+  const brand = '#C75B39', forest = '#3E5C4A', line = '#ECE3D5', ink = '#9A8C78';
+  const sum = (a) => a.reduce((x, y) => x + y, 0);
+  const fmt = (n) => new Intl.NumberFormat('ru-RU').format(n);
+  if (!window.Chart) return;
+  Chart.defaults.font.family = "'Golos Text', sans-serif";
+  Chart.defaults.color = ink;
+
+  // динамика: выручка (столбцы) + заказы (линия), две оси
+  const dyn = document.getElementById('dynChart');
+  if (dyn && sum(data.revenue) + sum(data.orders) > 0) {
+    new Chart(dyn, {
+      data: {
+        labels: data.labels,
+        datasets: [
+          { type: 'bar', label: data.i18n.revenue, data: data.revenue, yAxisID: 'y',
+            backgroundColor: brand + 'cc', borderRadius: 6, maxBarThickness: 34, order: 2 },
+          { type: 'line', label: data.i18n.orders, data: data.orders, yAxisID: 'y1',
+            borderColor: forest, backgroundColor: forest, tension: .35, pointRadius: 3, order: 1 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { boxWidth: 12, usePointStyle: true } },
+          tooltip: { callbacks: { label: (c) => c.dataset.yAxisID === 'y'
+            ? ` ${c.dataset.label}: ${fmt(c.parsed.y)}` : ` ${c.dataset.label}: ${c.parsed.y}` } },
+        },
+        scales: {
+          y: { position: 'left', grid: { color: line }, ticks: { callback: (v) => fmt(v) } },
+          y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { precision: 0 }, beginAtZero: true },
+          x: { grid: { display: false } },
+        },
+      },
+    });
+  }
+
+  // топ блюд: горизонтальные столбцы
+  const top = document.getElementById('topChart');
+  if (top && data.top_labels.length) {
+    new Chart(top, {
+      type: 'bar',
+      data: { labels: data.top_labels, datasets: [{ label: data.i18n.qty, data: data.top_qty,
+        backgroundColor: brand + 'cc', borderRadius: 6, maxBarThickness: 22 }] },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { color: line }, ticks: { precision: 0 }, beginAtZero: true },
+                  y: { grid: { display: false } } },
+      },
+    });
+  }
+})();
+</script>
 {% endblock %}

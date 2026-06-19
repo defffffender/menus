@@ -374,6 +374,28 @@ def analytics(request, slug):
     for t in top:
         t['rev_display'] = _money(t['rev'])
 
+    # дневная динамика за 7 дней (для графиков)
+    days = [week_start + timezone.timedelta(days=i) for i in range(7)]
+    chart_labels, chart_orders, chart_revenue = [], [], []
+    for d in days:
+        day_orders = restaurant.orders.filter(created_at__date=d).exclude(status=Order.Status.CANCELLED)
+        chart_labels.append(d.strftime('%d.%m'))
+        chart_orders.append(day_orders.count())
+        chart_revenue.append(int(revenue(OrderItem.objects.filter(order__in=day_orders))))
+
+    chart = {
+        'labels': chart_labels,
+        'orders': chart_orders,
+        'revenue': chart_revenue,
+        'top_labels': [t['name'] for t in top],
+        'top_qty': [t['qty'] for t in top],
+        'i18n': {
+            'orders': translate(resolve_lang(request), 'an_orders'),
+            'revenue': translate(resolve_lang(request), 'an_revenue'),
+            'qty': translate(resolve_lang(request), 'an_qty'),
+        },
+    }
+
     ctx = _shell(request, restaurant, 'analytics')
     ctx.update({
         'active_now': restaurant.orders.filter(status__in=Order.FLOW).count(),
@@ -383,6 +405,8 @@ def analytics(request, slug):
         'week_count': week_count,
         'week_rev': _money(week_rev),
         'top': top,
+        'chart': chart,
+        'has_chart_data': bool(week_count),
     })
     return render(request, 'cabinet/analytics.html', ctx)
 

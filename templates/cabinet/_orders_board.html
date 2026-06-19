@@ -18,7 +18,7 @@
         <div class="flex items-center justify-between mb-2">
           <span class="font-semibold text-sm">№ {{ order.pk }}</span>
           <span class="text-xs text-ink/50">
-            {% if order.table %}{{ t.ord_table }} {{ order.table.name }}{% else %}{{ t.ord_no_table }}{% endif %}
+            {% if order.table %}{{ order.table.name }}{% else %}{{ t.ord_no_table }}{% endif %}
           </span>
         </div>
         <ul class="text-sm space-y-0.5 mb-2">

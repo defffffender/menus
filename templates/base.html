@@ -17,9 +17,10 @@
   }
 </script>
 <style>
-  body{cursor:default}
-  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text}
-  a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer}
+  *{cursor:default!important}
+  body{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text!important;-webkit-user-select:text;-moz-user-select:text;user-select:text}
+  a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer!important}
   a,button,select,input,textarea,.transition{transition:background-color .18s,border-color .18s,color .18s,box-shadow .18s,transform .18s,opacity .18s;transition-timing-function:cubic-bezier(.4,0,.2,1)}
   html{scroll-behavior:smooth}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}

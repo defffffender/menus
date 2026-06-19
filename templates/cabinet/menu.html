@@ -46,12 +46,15 @@
     {% for category in categories %}
       <section>
         <!-- category header -->
-        <div class="flex items-center gap-3 mb-3">
+        <div class="flex items-center gap-3 mb-3 bg-clay/15 border border-clay/30 rounded-xl px-4 py-2.5">
           <h2 class="font-display text-lg font-semibold">{{ category.name_ru }}</h2>
-          <span class="text-xs text-ink/40">{{ category.dishes.count }}</span>
+          <span class="text-xs font-semibold text-ink/50 bg-white/70 rounded-full px-2 py-0.5 tabular-nums">{{ category.dishes.count }}</span>
           <div class="flex-1"></div>
+          <a href="{% url 'menu:dish_add' restaurant.slug %}?category={{ category.pk }}"
+             class="text-xs font-semibold text-brand hover:text-brand/70">+ {{ t.menu_add_dish_here }}</a>
+          <span class="text-line">·</span>
           <button @click="editId = (editId === {{ category.pk }} ? null : {{ category.pk }})"
-                  class="text-xs font-semibold text-ink/50 hover:text-brand">{{ t.menu_edit }}</button>
+                  class="text-xs font-semibold text-ink/60 hover:text-brand">{{ t.menu_edit }}</button>
           <form method="post" action="{% url 'menu:category_delete' restaurant.slug category.pk %}"
                 onsubmit="return confirm('{{ t.cat_delete_confirm }}')">
             {% csrf_token %}

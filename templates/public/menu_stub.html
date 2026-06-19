@@ -14,11 +14,17 @@
     fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'] }
   } } }
 </script>
+<style>
+  *{cursor:default!important}
+  body{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text!important;-webkit-user-select:text;-moz-user-select:text;user-select:text}
+  a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer!important}
+</style>
 </head>
 <body class="font-body bg-sand text-ink min-h-screen flex flex-col">
   <header class="bg-brand text-white px-5 py-4 flex items-center justify-between">
     <span class="font-display text-lg font-semibold">{{ restaurant.name }}</span>
-    <span class="text-xs bg-white/20 rounded-full px-2.5 py-1">{{ t.stub_table }} {{ table.name }}</span>
+    <span class="text-xs bg-white/20 rounded-full px-2.5 py-1">{{ table.name }}</span>
   </header>
   <main class="flex-1 flex flex-col items-center justify-center text-center px-6 gap-3">
     <div class="text-5xl">🍽️</div>
