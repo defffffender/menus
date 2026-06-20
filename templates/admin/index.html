@@ -1,0 +1,148 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  .mdash { margin-bottom: 28px; }
+  .mdash-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .mdash-card { background: #fff; border: 1px solid var(--hairline-color, #ECE3D5); border-radius: 14px; padding: 16px 18px; }
+  .mdash-card .v { font-size: 26px; font-weight: 700; color: #2A2118; line-height: 1.1; }
+  .mdash-card .l { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #8a8077; margin-top: 6px; }
+  .mdash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+  .mdash-panel { background: #fff; border: 1px solid var(--hairline-color, #ECE3D5); border-radius: 14px; padding: 16px 18px; min-width: 0; }
+  .mdash-panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #8a8077; margin: 0 0 12px; }
+  /* фиксированная высота обязательна, иначе Chart.js с maintainAspectRatio:false растёт бесконечно */
+  .mdash-chart { position: relative; width: 100%; }
+  .mdash-chart.tall { height: 240px; }
+  .mdash-chart.mid { height: 180px; }
+  .mdash-chart.short { height: 150px; }
+  @media (max-width: 860px) { .mdash-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+  <section class="mdash">
+    <div class="mdash-cards">
+      <div class="mdash-card"><div class="v" id="c-restaurants">—</div><div class="l">Заведений</div></div>
+      <div class="mdash-card"><div class="v" id="c-users">—</div><div class="l">Пользователей</div></div>
+      <div class="mdash-card"><div class="v" id="c-orders-today">—</div><div class="l">Заказов сегодня</div></div>
+      <div class="mdash-card"><div class="v" id="c-revenue">—</div><div class="l">Выручка за 14 дней</div></div>
+    </div>
+    <div class="mdash-grid">
+      <div class="mdash-panel">
+        <h2>Заказы и выручка · 14 дней</h2>
+        <div class="mdash-chart tall"><canvas id="ch-activity"></canvas></div>
+      </div>
+      <div class="mdash-panel">
+        <h2>Новые заведения</h2>
+        <div class="mdash-chart tall"><canvas id="ch-reg"></canvas></div>
+      </div>
+    </div>
+    <div class="mdash-grid" style="margin-top:14px">
+      <div class="mdash-panel">
+        <h2>Заведения по дням</h2>
+        <div class="mdash-chart short"><canvas id="ch-orders"></canvas></div>
+      </div>
+      <div class="mdash-panel">
+        <h2>Пользователи по тарифам</h2>
+        <div class="mdash-chart mid"><canvas id="ch-plans"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  var BRAND = '#C75B39', FOREST = '#3E5C4A', CLAY = '#E0A04D', INK = '#2A2118';
+  var fmt = new Intl.NumberFormat('ru-RU');
+
+  function defaults() {
+    Chart.defaults.font.family = "'Golos Text', system-ui, sans-serif";
+    Chart.defaults.color = '#8a8077';
+    Chart.defaults.plugins.legend.display = false;
+  }
+
+  fetch("{% url 'core:admin_dashboard_data' %}", { headers: { 'X-Requested-With': 'fetch' } })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      document.getElementById('c-restaurants').textContent = fmt.format(d.cards.restaurants);
+      document.getElementById('c-users').textContent = fmt.format(d.cards.users);
+      document.getElementById('c-orders-today').textContent = fmt.format(d.cards.orders_today);
+      document.getElementById('c-revenue').textContent = fmt.format(d.cards.revenue_14d) + ' сум';
+
+      if (!window.Chart) return;
+      defaults();
+
+      new Chart(document.getElementById('ch-activity'), {
+        type: 'bar',
+        data: { labels: d.labels, datasets: [
+          { type: 'line', label: 'Выручка', data: d.revenue, borderColor: BRAND, backgroundColor: 'rgba(199,91,57,.1)', yAxisID: 'y1', tension: .35, fill: true, pointRadius: 0 },
+          { label: 'Заказы', data: d.orders, backgroundColor: FOREST, borderRadius: 5, yAxisID: 'y' }
+        ] },
+        options: { responsive: true, maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, position: 'left', grid: { display: false } },
+            y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
+          } }
+      });
+
+      new Chart(document.getElementById('ch-reg'), {
+        type: 'line',
+        data: { labels: d.labels, datasets: [{ data: d.registrations, borderColor: CLAY, backgroundColor: 'rgba(224,160,77,.15)', tension: .35, fill: true, pointRadius: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+      });
+
+      new Chart(document.getElementById('ch-orders'), {
+        type: 'bar',
+        data: { labels: d.labels, datasets: [{ data: d.orders, backgroundColor: FOREST, borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } } } }
+      });
+
+      new Chart(document.getElementById('ch-plans'), {
+        type: 'doughnut',
+        data: { labels: d.plans.map(function (p) { return p.label; }),
+          datasets: [{ data: d.plans.map(function (p) { return p.n; }), backgroundColor: [BRAND, FOREST, CLAY, INK, '#9e431f'] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' } } }
+      });
+    })
+    .catch(function () {});
+})();
+</script>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+  <div class="module" id="recent-actions-module">
+    <h2>{% translate 'Recent actions' %}</h2>
+    <h3>{% translate 'My actions' %}</h3>
+    {% load log %}
+    {% get_admin_log 10 as admin_log for_user user %}
+    {% if not admin_log %}
+      <p>{% translate 'None available' %}</p>
+    {% else %}
+      <ul class="actionlist">
+        {% for entry in admin_log %}
+          <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+            {% if entry.is_deletion or not entry.get_admin_url %}
+              {{ entry.object_repr }}
+            {% else %}
+              <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+            {% endif %}
+            <br>
+            {% if entry.content_type %}
+              <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
+            {% else %}
+              <span class="mini quiet">{% translate 'Unknown content' %}</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

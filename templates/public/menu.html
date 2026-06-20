@@ -222,7 +222,10 @@
             });
             const data = await resp.json();
             if (data.ok) { window.location = data.redirect; return; }
-            this.error = '{{ t.pub_order_error }}';
+            // стол закрыт официантом/протух визит — гостю надо обновить страницу
+            this.error = data.error === 'table_closed'
+              ? '{{ t.pub_table_closed }}'
+              : '{{ t.pub_order_error }}';
           } catch (e) {
             this.error = '{{ t.pub_order_error }}';
           }

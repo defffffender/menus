@@ -15,4 +15,5 @@ urlpatterns = [
     path('cabinet/<str:slug>/orders/history/', views.orders_history, name='history'),
     path('cabinet/<str:slug>/orders/feed/', views.orders_feed, name='feed'),
     path('cabinet/<str:slug>/orders/<int:pk>/status/', views.order_set_status, name='set_status'),
+    path('cabinet/<str:slug>/tables/<int:table_pk>/close/', views.close_table, name='close_table'),
 ]

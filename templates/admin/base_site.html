@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Menus admin') }}{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}">🍽 Menus <span style="opacity:.55;font-weight:400">· Платформа</span></a>
+</div>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  :root {
+    --primary: #3E5C4A;
+    --secondary: #2A2118;
+    --accent: #C75B39;
+    --primary-fg: #fff;
+
+    --header-bg: #2A2118;
+    --header-color: #FBF6EE;
+    --header-branding-color: #E0A04D;
+    --header-link-color: #FBF6EE;
+
+    --breadcrumbs-bg: #3E5C4A;
+    --breadcrumbs-fg: #FBF6EE;
+    --breadcrumbs-link-fg: #ffffff;
+
+    --link-fg: #C75B39;
+    --link-hover-color: #9e431f;
+    --link-selected-fg: #3E5C4A;
+
+    --button-bg: #C75B39;
+    --button-hover-bg: #a84a2e;
+    --button-fg: #fff;
+    --default-button-bg: #3E5C4A;
+    --default-button-hover-bg: #2f4839;
+
+    --object-tools-bg: #2A2118;
+    --object-tools-hover-bg: #3E5C4A;
+
+    --selected-row: #FBF6EE;
+  }
+  #site-name a { color: var(--header-branding-color); }
+  div.breadcrumbs a:focus, div.breadcrumbs a:hover { color: #fff; }
+</style>
+{% endblock %}

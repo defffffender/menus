@@ -113,7 +113,23 @@ def verify(request):
         left = attempts_left(phone)
         messages.error(request, f"{tr(request, 'err_invalid_code')} · {tr(request, 'err_attempts_left')}: {left}")
 
-    return render(request, 'accounts/verify.html', {'phone': phone})
+    # сколько секунд до возможности отправить код заново (для таймера на странице);
+    # сервер всё равно проверяет паузу при resend, таймер — только подсказка
+    return render(request, 'accounts/verify.html', {'phone': phone, 'resend_in': min(otp_cooldown(phone), 60)})
+
+
+def resend(request):
+    """Повторно отправить код, уважая паузу/лимит. Без перезапроса номера."""
+    phone = request.session.get('otp_phone')
+    mode = request.session.get('otp_mode')
+    if not phone or not mode:
+        return redirect('accounts:login')
+    if otp_cooldown(phone):
+        messages.info(request, tr(request, 'err_otp_throttled'))
+    else:
+        issue_otp(phone)
+        messages.success(request, tr(request, 'msg_code_sent'))
+    return redirect('accounts:verify')
 
 
 def logout_view(request):

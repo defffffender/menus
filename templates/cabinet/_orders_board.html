@@ -4,6 +4,24 @@
   {% if closed_today %}<span class="text-ink/40">· {{ closed_today }} {{ t.ord_closed_today }}</span>{% endif %}
 </div>
 
+{% if open_tables %}
+<div class="mb-5">
+  <div class="text-xs font-semibold uppercase tracking-wide text-ink/40 mb-2">{{ t.ord_open_tables }}</div>
+  <div class="flex flex-wrap gap-2">
+    {% for tbl in open_tables %}
+    <span class="inline-flex items-center gap-1.5 bg-white border border-line rounded-full pl-3 pr-1 py-1 text-sm">
+      <span class="w-1.5 h-1.5 rounded-full bg-forest"></span>{{ tbl.name }}
+      <button hx-post="{% url 'orders:close_table' restaurant.slug tbl.pk %}"
+              hx-target="#board" hx-swap="innerHTML"
+              hx-confirm="{{ t.ord_close_table_confirm }}"
+              title="{{ t.ord_close_table }}"
+              class="w-6 h-6 grid place-items-center rounded-full text-ink/40 hover:text-red-500 hover:bg-red-50">✕</button>
+    </span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 {% if total_active %}
 <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
   {% for col in columns %}

@@ -19,6 +19,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+# брендинг платформенной админки (панель владельца сервиса)
+admin.site.site_header = 'Menus · Платформа'
+admin.site.site_title = 'Menus admin'
+admin.site.index_title = 'Панель управления сервисом'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.core.urls')),

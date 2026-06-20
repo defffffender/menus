@@ -33,6 +33,9 @@ TR = {
     'verify_sent':      {'ru': 'Мы отправили код на номер', 'uz': 'Kod yuborilgan raqam', 'en': 'We sent a code to'},
     'verify_code':      {'ru': 'Код подтверждения', 'uz': 'Tasdiqlash kodi', 'en': 'Confirmation code'},
     'verify_submit':    {'ru': 'Подтвердить', 'uz': 'Tasdiqlash', 'en': 'Confirm'},
+    'verify_resend':    {'ru': 'Отправить код повторно', 'uz': 'Kodni qayta yuborish', 'en': 'Resend code'},
+    'verify_resend_in': {'ru': 'Повторная отправка через', 'uz': 'Qayta yuborish', 'en': 'Resend available in'},
+    'verify_sec':       {'ru': 'сек', 'uz': 'son.', 'en': 'sec'},
 
     # вход
     'login_title':      {'ru': 'Вход', 'uz': 'Kirish', 'en': 'Log in'},
@@ -176,6 +179,7 @@ TR = {
     'pub_comment_ph':   {'ru': 'Без лука, побыстрее…', 'uz': 'Piyozsiz, tezroq…', 'en': 'No onion, faster…'},
     'pub_send':         {'ru': 'Отправить заказ', 'uz': 'Buyurtmani yuborish', 'en': 'Send order'},
     'pub_order_error':  {'ru': 'Не удалось отправить заказ, попробуйте ещё раз', 'uz': 'Buyurtma yuborilmadi, qayta urinib koʻring', 'en': 'Could not send the order, please try again'},
+    'pub_table_closed': {'ru': 'Стол закрыт. Обновите страницу или позовите официанта.', 'uz': 'Stol yopilgan. Sahifani yangilang yoki ofitsiantni chaqiring.', 'en': 'The table is closed. Refresh the page or call a waiter.'},
     'pub_checkout':     {'ru': 'Оформить', 'uz': 'Rasmiylashtirish', 'en': 'Checkout'},
     'pub_clear':        {'ru': 'Очистить', 'uz': 'Tozalash', 'en': 'Clear'},
     'pub_items':        {'ru': 'поз.', 'uz': 'ta', 'en': 'items'},
@@ -273,6 +277,9 @@ TR = {
     'ord_subtitle':     {'ru': 'Новые заказы появляются автоматически', 'uz': 'Yangi buyurtmalar avtomatik chiqadi', 'en': 'New orders appear automatically'},
     'ord_active':       {'ru': 'активных', 'uz': 'faol', 'en': 'active'},
     'ord_closed_today': {'ru': 'закрыто сегодня', 'uz': 'bugun yopildi', 'en': 'closed today'},
+    'ord_open_tables':  {'ru': 'Открытые столы', 'uz': 'Ochiq stollar', 'en': 'Open tables'},
+    'ord_close_table':  {'ru': 'Закрыть стол', 'uz': 'Stolni yopish', 'en': 'Close table'},
+    'ord_close_table_confirm': {'ru': 'Закрыть стол? Новые заказы по нему приниматься не будут, пока гость снова не откроет меню.', 'uz': 'Stol yopilsinmi? Mehmon menyuni qayta ochmaguncha yangi buyurtmalar qabul qilinmaydi.', 'en': 'Close this table? New orders won’t be accepted until a guest reopens the menu.'},
     'ord_empty_col':    {'ru': 'Пусто', 'uz': 'Boʻsh', 'en': 'Empty'},
     'ord_no_active':    {'ru': 'Пока нет активных заказов', 'uz': 'Hozircha faol buyurtmalar yoʻq', 'en': 'No active orders yet'},
     'ord_table':        {'ru': 'Стол', 'uz': 'Stol', 'en': 'Table'},

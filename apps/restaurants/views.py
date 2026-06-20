@@ -659,6 +659,11 @@ def guest_menu(request, qr_token):
     )
     restaurant = table.restaurant
     lang = resolve_lang(request)
+    # просмотр меню = «сканирование»: открываем визит, если стол сейчас закрыт.
+    # Сам заказ сессию НЕ открывает — поэтому после «Закрыть стол» забытая
+    # вкладка уже не сможет дозаказывать (нужно заново открыть страницу).
+    if not table.session_is_open:
+        table.open_session()
     return render(request, 'public/menu.html', {
         'table': table,
         'restaurant': restaurant,

@@ -1,7 +1,13 @@
 import uuid
+from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+
+# Сессия стола (визит): пока открыта — гость может заказывать. Официант закрывает
+# её после оплаты; плюс автозакрытие по простою, чтобы забытый стол не «висел».
+TABLE_SESSION_TTL = timedelta(hours=4)
 
 
 def gen_qr_token():
@@ -247,6 +253,8 @@ class Table(models.Model):
     is_active = models.BooleanField('Активен', default=True)
     sort_order = models.PositiveIntegerField('Порядок', default=0)
     created_at = models.DateTimeField('Создан', auto_now_add=True)
+    # Начало текущего визита; None — стол закрыт (заказы не принимаются).
+    session_opened_at = models.DateTimeField('Сессия открыта', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Стол'
@@ -255,3 +263,25 @@ class Table(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def session_is_open(self):
+        """Открыта ли сессia стола (визит активен и не протух по простою)."""
+        if self.session_opened_at is None:
+            return False
+        return timezone.now() - self.session_opened_at < TABLE_SESSION_TTL
+
+    def open_session(self):
+        """Открыть сессию визита (вызывается при просмотре меню = «сканировании»)."""
+        self.session_opened_at = timezone.now()
+        self.save(update_fields=['session_opened_at'])
+
+    def touch_session(self):
+        """Продлить активную сессию (успешный заказ = активность за столом)."""
+        self.session_opened_at = timezone.now()
+        self.save(update_fields=['session_opened_at'])
+
+    def close_session(self):
+        """Закрыть стол: новые заказы больше не принимаются до нового визита."""
+        self.session_opened_at = None
+        self.save(update_fields=['session_opened_at'])

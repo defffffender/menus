@@ -34,6 +34,11 @@ def create_order(request, qr_token):
     )
     restaurant = table.restaurant
 
+    # стол должен быть «открыт» (визит активен). Закрыт официантом или протух по
+    # простою → заказ не принимаем: гость должен заново открыть меню (= новый визит)
+    if not table.session_is_open:
+        return JsonResponse({'ok': False, 'error': 'table_closed'}, status=409)
+
     # анти-спам: ограничиваем частоту заказов со стола (qr_token публичен — на столе)
     minute_ago = timezone.now() - timedelta(minutes=1)
     if Order.objects.filter(table=table, created_at__gte=minute_ago).count() >= ORDER_RATE_PER_MIN:
@@ -79,6 +84,7 @@ def create_order(request, qr_token):
         return JsonResponse({'ok': False, 'error': 'unavailable'}, status=400)
 
     order = place_order(restaurant, table, comment, items)
+    table.touch_session()  # активность за столом продлевает визит
 
     return JsonResponse({
         'ok': True,
@@ -159,6 +165,37 @@ def order_set_status(request, slug, pk):
     apply_status_action(order, request.POST.get('action'))
     return render(request, 'cabinet/_orders_board.html',
                   _board_context(restaurant, resolve_lang(request), request.membership))
+
+
+@login_required
+@require_POST
+def close_table(request, slug, table_pk):
+    """Официант закрывает стол после оплаты — новые заказы по нему блокируются."""
+    restaurant = _get_restaurant(request, slug, perm='orders')
+    table = get_object_or_404(Table, pk=table_pk, restaurant=restaurant)
+    # официант вправе закрывать только свои (или ничьи) столы
+    waiter_ids = set(table.waiters.values_list('id', flat=True))
+    from apps.restaurants.models import Membership
+    is_waiter = request.membership and request.membership.role == Membership.Role.WAITER
+    if is_waiter and waiter_ids and request.membership.user_id not in waiter_ids:
+        pass  # чужой стол — молча игнорируем, просто перерисуем доску
+    else:
+        table.close_session()
+    return render(request, 'cabinet/_orders_board.html',
+                  _board_context(restaurant, resolve_lang(request), request.membership))
+
+
+def _open_tables(restaurant, membership):
+    """Столы с активным визитом (для строки «Открытые столы» на доске)."""
+    from apps.restaurants.models import Membership, TABLE_SESSION_TTL
+    fresh = timezone.now() - TABLE_SESSION_TTL
+    qs = restaurant.tables.filter(session_opened_at__gte=fresh)
+    if membership and membership.role == Membership.Role.WAITER:
+        from django.db.models import Q
+        qs = qs.filter(
+            Q(waiters=membership.user_id) | Q(waiters__isnull=True)
+        ).distinct()
+    return qs.order_by('sort_order', 'id')
 
 
 def _waiter_filtered(qs, membership):
@@ -286,4 +323,5 @@ def _board_context(restaurant, lang, membership=None):
         'columns': columns,
         'total_active': total_active,
         'closed_today': closed_today,
+        'open_tables': _open_tables(restaurant, membership),
     }

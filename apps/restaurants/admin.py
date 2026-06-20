@@ -44,7 +44,7 @@ class TableZoneAdmin(admin.ModelAdmin):
 
 @admin.register(Table)
 class TableAdmin(admin.ModelAdmin):
-    list_display = ('name', 'restaurant', 'zone', 'seats', 'is_active', 'sort_order')
+    list_display = ('name', 'restaurant', 'zone', 'seats', 'is_active', 'session_opened_at', 'sort_order')
     list_filter = ('is_active', 'restaurant')
     search_fields = ('name', 'restaurant__name')
     autocomplete_fields = ('restaurant', 'zone', 'waiters')
