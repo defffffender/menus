@@ -1,5 +1,7 @@
 from django.contrib import messages
-from django.contrib.auth import login, logout
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 
 from apps.core.translations import tr
@@ -12,16 +14,37 @@ from .services import attempts_left, issue_otp, otp_cooldown, verify_otp
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
 
+def _password_error(request, pw, pw2, phone=None):
+    """Проверка пароля: непустой, совпадает с повтором, проходит политику Django.
+    Возвращает текст ошибки или None, если всё хорошо."""
+    if not pw:
+        return tr(request, 'err_required')
+    if pw != pw2:
+        return tr(request, 'err_pw_mismatch')
+    probe = User(phone=normalize_phone(phone)) if phone else None
+    try:
+        validate_password(pw, user=probe)
+    except ValidationError as e:
+        return ' · '.join(e.messages)
+    return None
+
+
 def register(request):
-    # уже вошёл — новое заведение добавляется из кабинета, не через регистрацию
+    # SMS-код тратим только здесь и при восстановлении; вход — по паролю.
     if request.user.is_authenticated:
         return redirect('restaurants:cabinet')
+    values = {}
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         rtype = request.POST.get('type', '').strip() or Restaurant.Type.RESTAURANT
         city = request.POST.get('city', '').strip()
         phone = request.POST.get('phone', '').strip()
+        pw = request.POST.get('password', '')
+        pw2 = request.POST.get('password2', '')
         nphone = normalize_phone(phone)
+        values = {'name': name, 'type': rtype, 'city': city, 'phone': phone}
+
+        pw_err = _password_error(request, pw, pw2, phone)
         if not name or not phone:
             messages.error(request, tr(request, 'err_required'))
         elif not is_valid_uz_phone(phone):
@@ -30,47 +53,48 @@ def register(request):
             # один номер — один аккаунт; новые заведения добавляются в кабинете
             messages.error(request, tr(request, 'reg_exists'))
             return redirect('accounts:login')
+        elif pw_err:
+            messages.error(request, pw_err)
         else:
-            request.session['reg_data'] = {'name': name, 'type': rtype, 'city': city, 'phone': phone}
+            # пароль кладём в серверную сессию (БД-бэкенд) до подтверждения кода
+            request.session['reg_data'] = {
+                'name': name, 'type': rtype, 'city': city, 'phone': phone, 'password': pw,
+            }
             request.session['otp_phone'] = nphone
             request.session['otp_mode'] = 'register'
             if otp_cooldown(nphone):
                 messages.info(request, tr(request, 'err_otp_throttled'))
             else:
-                issue_otp(phone)
+                issue_otp(phone, 'register')
                 messages.success(request, tr(request, 'msg_code_sent'))
             return redirect('accounts:verify')
-    return render(request, 'accounts/register.html')
+    return render(request, 'accounts/register.html', {'values': values})
 
 
 def login_view(request):
+    # Вход по телефону + паролю (без SMS).
     if request.user.is_authenticated:
         return redirect('restaurants:cabinet')
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
+        pw = request.POST.get('password', '')
         nphone = normalize_phone(phone)
-        if not is_valid_uz_phone(phone):
-            messages.error(request, tr(request, 'err_phone_uz'))
-        elif not User.objects.filter(phone=nphone).exists():
-            messages.error(request, tr(request, 'err_no_user'))
-        else:
-            request.session['otp_phone'] = nphone
-            request.session['otp_mode'] = 'login'
-            if otp_cooldown(nphone):
-                messages.info(request, tr(request, 'err_otp_throttled'))
-            else:
-                issue_otp(phone)
-                messages.success(request, tr(request, 'msg_code_sent'))
-            return redirect('accounts:verify')
+        user = authenticate(request, username=nphone, password=pw)
+        if user is not None:
+            login(request, user, backend=AUTH_BACKEND)
+            return redirect('restaurants:cabinet')
+        messages.error(request, tr(request, 'err_bad_credentials'))
+        return render(request, 'accounts/login.html', {'phone': phone})
     return render(request, 'accounts/login.html')
 
 
 def verify(request):
+    # Подтверждение SMS-кода: для регистрации и для восстановления пароля.
     if request.user.is_authenticated:
         return redirect('restaurants:cabinet')
     phone = request.session.get('otp_phone')
     mode = request.session.get('otp_mode')
-    if not phone or not mode:
+    if not phone or mode not in ('register', 'reset'):
         return redirect('accounts:login')
 
     if request.method == 'POST':
@@ -81,6 +105,9 @@ def verify(request):
             if mode == 'register':
                 data = request.session.get('reg_data', {})
                 user, _ = User.objects.get_or_create(phone=phone)
+                if data.get('password'):
+                    user.set_password(data['password'])
+                    user.save(update_fields=['password'])
                 restaurant = Restaurant.objects.create(
                     owner=user,
                     name=data.get('name', 'Заведение'),
@@ -93,43 +120,91 @@ def verify(request):
                     user=user, restaurant=restaurant,
                     defaults={'role': Membership.Role.OWNER},
                 )
-            else:
-                user = User.objects.filter(phone=phone).first()
-                if user is None:
-                    messages.error(request, tr(request, 'err_no_user'))
-                    return redirect('accounts:login')
+                login(request, user, backend=AUTH_BACKEND)
+                for key in ('otp_phone', 'otp_mode', 'reg_data'):
+                    request.session.pop(key, None)
+                return redirect('restaurants:cabinet')
 
-            login(request, user, backend=AUTH_BACKEND)
-            for key in ('otp_phone', 'otp_mode', 'reg_data'):
+            # mode == 'reset': код верный — пускаем к установке нового пароля
+            request.session['reset_phone'] = phone
+            for key in ('otp_phone', 'otp_mode'):
                 request.session.pop(key, None)
-            return redirect('restaurants:cabinet')
+            return redirect('accounts:password_reset_set')
 
-        # неуспех: блокировка / истёк / неверный — для locked/none уводим к запросу нового кода
+        # неуспех: блокировка / истёк / неверный
         if result in ('locked', 'none'):
             request.session.pop('otp_phone', None)
             messages.error(request, tr(request, 'err_otp_locked' if result == 'locked' else 'err_otp_expired'))
-            return redirect('accounts:login' if mode == 'login' else 'accounts:register')
+            return redirect('accounts:register' if mode == 'register' else 'accounts:password_reset')
 
         left = attempts_left(phone)
         messages.error(request, f"{tr(request, 'err_invalid_code')} · {tr(request, 'err_attempts_left')}: {left}")
 
-    # сколько секунд до возможности отправить код заново (для таймера на странице);
-    # сервер всё равно проверяет паузу при resend, таймер — только подсказка
     return render(request, 'accounts/verify.html', {'phone': phone, 'resend_in': min(otp_cooldown(phone), 60)})
 
 
 def resend(request):
-    """Повторно отправить код, уважая паузу/лимит. Без перезапроса номера."""
+    """Повторно отправить код (для регистрации/восстановления), уважая паузу/лимит."""
     phone = request.session.get('otp_phone')
     mode = request.session.get('otp_mode')
-    if not phone or not mode:
+    if not phone or mode not in ('register', 'reset'):
         return redirect('accounts:login')
     if otp_cooldown(phone):
         messages.info(request, tr(request, 'err_otp_throttled'))
     else:
-        issue_otp(phone)
+        issue_otp(phone, mode)  # 'register' или 'reset' — соответствующий текст
         messages.success(request, tr(request, 'msg_code_sent'))
     return redirect('accounts:verify')
+
+
+def password_reset(request):
+    """Восстановление доступа: ввод телефона → отправка SMS-кода."""
+    if request.user.is_authenticated:
+        return redirect('restaurants:cabinet')
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        nphone = normalize_phone(phone)
+        if not is_valid_uz_phone(phone):
+            messages.error(request, tr(request, 'err_phone_uz'))
+        elif not User.objects.filter(phone=nphone).exists():
+            messages.error(request, tr(request, 'err_no_user'))
+        else:
+            request.session['otp_phone'] = nphone
+            request.session['otp_mode'] = 'reset'
+            if otp_cooldown(nphone):
+                messages.info(request, tr(request, 'err_otp_throttled'))
+            else:
+                issue_otp(phone, 'reset')
+                messages.success(request, tr(request, 'msg_code_sent'))
+            return redirect('accounts:verify')
+    return render(request, 'accounts/password_reset.html')
+
+
+def password_reset_set(request):
+    """Установка нового пароля. Доступна только после подтверждения кода."""
+    if request.user.is_authenticated:
+        return redirect('restaurants:cabinet')
+    phone = request.session.get('reset_phone')
+    if not phone:
+        return redirect('accounts:password_reset')
+    if request.method == 'POST':
+        pw = request.POST.get('password', '')
+        pw2 = request.POST.get('password2', '')
+        err = _password_error(request, pw, pw2, phone)
+        if err:
+            messages.error(request, err)
+        else:
+            user = User.objects.filter(phone=phone).first()
+            if user is None:
+                request.session.pop('reset_phone', None)
+                return redirect('accounts:login')
+            user.set_password(pw)
+            user.save(update_fields=['password'])
+            request.session.pop('reset_phone', None)
+            login(request, user, backend=AUTH_BACKEND)
+            messages.success(request, tr(request, 'pw_changed'))
+            return redirect('restaurants:cabinet')
+    return render(request, 'accounts/password_reset_set.html')
 
 
 def logout_view(request):

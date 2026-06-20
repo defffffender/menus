@@ -23,6 +23,7 @@ db.sqlite3-journal
 # Окружение / секреты
 .env
 .env.*
+!.env.example
 
 # Claude Code (локальные настройки)
 .claude/

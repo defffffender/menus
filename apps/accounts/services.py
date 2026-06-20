@@ -8,6 +8,15 @@ from .sms import send_sms
 
 OTP_LENGTH = 4
 OTP_TTL = timedelta(minutes=5)
+
+# Тексты SMS под требования модерации Eskiz: в коде ОБЯЗАТЕЛЬНО указаны
+# НАЗВАНИЕ РЕСУРСА (Menus) и ЦЕЛЬ использования кода — иначе оператор не пропустит.
+# На модерацию подавать ровно в этом виде ({code} — переменная-маска).
+OTP_MESSAGES = {
+    'register': 'Код подтверждения для регистрации на платформе Menus: {code}',
+    'reset': 'Код для восстановления пароля на платформе Menus: {code}',
+}
+
 # защита от злоупотреблений
 OTP_RESEND_PAUSE = timedelta(seconds=60)   # не чаще одного кода в минуту на номер
 OTP_HOURLY_LIMIT = 5                        # не больше N кодов в час на номер
@@ -39,12 +48,16 @@ def otp_cooldown(phone):
     return 0
 
 
-def issue_otp(phone):
-    """Сгенерировать код, сохранить и «отправить» по SMS."""
+def issue_otp(phone, purpose='register'):
+    """Сгенерировать код, сохранить и отправить по SMS.
+
+    purpose: 'register' | 'reset' — выбирает текст (с целью и названием ресурса).
+    """
     phone = normalize_phone(phone)
     code = f'{random.randint(0, 10 ** OTP_LENGTH - 1):0{OTP_LENGTH}d}'
     PhoneOTP.objects.create(phone=phone, code=code)
-    send_sms(phone, f'Menus: код подтверждения {code}')
+    text = OTP_MESSAGES.get(purpose, OTP_MESSAGES['register']).format(code=code)
+    send_sms(phone, text)
     return code
 
 

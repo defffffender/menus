@@ -19,6 +19,8 @@ TR = {
     'reg_type':         {'ru': 'Тип заведения', 'uz': 'Muassasa turi', 'en': 'Venue type'},
     'reg_city':         {'ru': 'Город', 'uz': 'Shahar', 'en': 'City'},
     'reg_phone':        {'ru': 'Телефон', 'uz': 'Telefon', 'en': 'Phone'},
+    'reg_password':     {'ru': 'Пароль', 'uz': 'Parol', 'en': 'Password'},
+    'reg_password2':    {'ru': 'Повтор пароля', 'uz': 'Parolni takrorlang', 'en': 'Repeat password'},
     'reg_submit':       {'ru': 'Получить код', 'uz': 'Kod olish', 'en': 'Get code'},
     'reg_have_account': {'ru': 'Уже есть аккаунт?', 'uz': 'Hisobingiz bormi?', 'en': 'Already have an account?'},
 
@@ -39,9 +41,20 @@ TR = {
 
     # вход
     'login_title':      {'ru': 'Вход', 'uz': 'Kirish', 'en': 'Log in'},
-    'login_submit':     {'ru': 'Получить код', 'uz': 'Kod olish', 'en': 'Get code'},
+    'login_password':   {'ru': 'Пароль', 'uz': 'Parol', 'en': 'Password'},
+    'login_submit':     {'ru': 'Войти', 'uz': 'Kirish', 'en': 'Log in'},
+    'login_forgot':     {'ru': 'Забыли пароль?', 'uz': 'Parolni unutdingizmi?', 'en': 'Forgot password?'},
     'login_no_account': {'ru': 'Нет аккаунта?', 'uz': 'Hisob yoʻqmi?', 'en': 'No account?'},
     'login_register':   {'ru': 'Зарегистрировать заведение', 'uz': 'Muassasani roʻyxatdan oʻtkazish', 'en': 'Register a venue'},
+
+    # восстановление пароля
+    'pwreset_title':    {'ru': 'Восстановление доступа', 'uz': 'Kirishni tiklash', 'en': 'Account recovery'},
+    'pwreset_hint':     {'ru': 'Введите номер — пришлём код для сброса пароля', 'uz': 'Raqamingizni kiriting — parolni tiklash kodi yuboriladi', 'en': 'Enter your number — we’ll send a reset code'},
+    'pwreset_submit':   {'ru': 'Получить код', 'uz': 'Kod olish', 'en': 'Get code'},
+    'pwset_title':      {'ru': 'Новый пароль', 'uz': 'Yangi parol', 'en': 'New password'},
+    'pwset_hint':       {'ru': 'Придумайте новый пароль для входа', 'uz': 'Kirish uchun yangi parol oʻylab toping', 'en': 'Create a new password to log in'},
+    'pwset_submit':     {'ru': 'Сохранить и войти', 'uz': 'Saqlash va kirish', 'en': 'Save and log in'},
+    'pw_changed':       {'ru': 'Пароль изменён', 'uz': 'Parol oʻzgartirildi', 'en': 'Password changed'},
 
     # кабинет
     'cab_title':        {'ru': 'Кабинет', 'uz': 'Kabinet', 'en': 'Dashboard'},
@@ -370,6 +383,8 @@ TR = {
     'err_otp_locked':   {'ru': 'Слишком много неверных попыток. Запросите новый код.', 'uz': 'Juda koʻp notoʻgʻri urinish. Yangi kod soʻrang.', 'en': 'Too many wrong attempts. Request a new code.'},
     'err_otp_expired':  {'ru': 'Код истёк или не запрашивался. Получите новый.', 'uz': 'Kod muddati oʻtgan yoki soʻralmagan. Yangisini oling.', 'en': 'Code expired or not requested. Get a new one.'},
     'err_no_user':      {'ru': 'Заведение с таким номером не найдено', 'uz': 'Bu raqam topilmadi', 'en': 'No account with this number'},
+    'err_pw_mismatch':  {'ru': 'Пароли не совпадают', 'uz': 'Parollar mos kelmadi', 'en': 'Passwords do not match'},
+    'err_bad_credentials': {'ru': 'Неверный телефон или пароль', 'uz': 'Notoʻgʻri telefon yoki parol', 'en': 'Wrong phone or password'},
     'reg_exists':       {'ru': 'Этот номер уже зарегистрирован. Войдите, а новое заведение добавьте в кабинете.', 'uz': 'Bu raqam allaqachon roʻyxatda. Kiring va yangi muassasani kabinetda qoʻshing.', 'en': 'This number is already registered. Log in and add a new venue from the dashboard.'},
 
     # ===== Лендинг (главная) =====

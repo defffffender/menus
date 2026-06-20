@@ -159,3 +159,15 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# --- SMS (Eskiz.uz) ---------------------------------------------------------
+# Пока ESKIZ_ENABLED=False — код подтверждения пишется в лог/консоль (dev).
+# На проде включаем и задаём логин/пароль кабинета Eskiz через .env.
+ESKIZ_ENABLED = env.bool('ESKIZ_ENABLED', default=False)
+ESKIZ_EMAIL = env.str('ESKIZ_EMAIL', default='')
+ESKIZ_PASSWORD = env.str('ESKIZ_PASSWORD', default='')
+# Отправитель: '4546' — тестовый по умолчанию; брендовый ник («Menus») нужно
+# отдельно зарегистрировать и промодерировать в кабинете Eskiz.
+ESKIZ_FROM = env.str('ESKIZ_FROM', default='4546')
+ESKIZ_BASE_URL = env.str('ESKIZ_BASE_URL', default='https://notify.eskiz.uz/api')
