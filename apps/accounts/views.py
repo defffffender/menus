@@ -7,7 +7,7 @@ from apps.restaurants.models import Membership, Restaurant
 from apps.restaurants.utils import unique_slug
 
 from .models import User, is_valid_uz_phone, normalize_phone
-from .services import issue_otp, verify_otp
+from .services import attempts_left, issue_otp, otp_cooldown, verify_otp
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
 
@@ -34,8 +34,11 @@ def register(request):
             request.session['reg_data'] = {'name': name, 'type': rtype, 'city': city, 'phone': phone}
             request.session['otp_phone'] = nphone
             request.session['otp_mode'] = 'register'
-            issue_otp(phone)
-            messages.success(request, tr(request, 'msg_code_sent'))
+            if otp_cooldown(nphone):
+                messages.info(request, tr(request, 'err_otp_throttled'))
+            else:
+                issue_otp(phone)
+                messages.success(request, tr(request, 'msg_code_sent'))
             return redirect('accounts:verify')
     return render(request, 'accounts/register.html')
 
@@ -53,8 +56,11 @@ def login_view(request):
         else:
             request.session['otp_phone'] = nphone
             request.session['otp_mode'] = 'login'
-            issue_otp(phone)
-            messages.success(request, tr(request, 'msg_code_sent'))
+            if otp_cooldown(nphone):
+                messages.info(request, tr(request, 'err_otp_throttled'))
+            else:
+                issue_otp(phone)
+                messages.success(request, tr(request, 'msg_code_sent'))
             return redirect('accounts:verify')
     return render(request, 'accounts/login.html')
 
@@ -69,7 +75,9 @@ def verify(request):
 
     if request.method == 'POST':
         code = request.POST.get('code', '').strip()
-        if verify_otp(phone, code):
+        result = verify_otp(phone, code)
+
+        if result == 'ok':
             if mode == 'register':
                 data = request.session.get('reg_data', {})
                 user, _ = User.objects.get_or_create(phone=phone)
@@ -96,7 +104,14 @@ def verify(request):
                 request.session.pop(key, None)
             return redirect('restaurants:cabinet')
 
-        messages.error(request, tr(request, 'err_invalid_code'))
+        # неуспех: блокировка / истёк / неверный — для locked/none уводим к запросу нового кода
+        if result in ('locked', 'none'):
+            request.session.pop('otp_phone', None)
+            messages.error(request, tr(request, 'err_otp_locked' if result == 'locked' else 'err_otp_expired'))
+            return redirect('accounts:login' if mode == 'login' else 'accounts:register')
+
+        left = attempts_left(phone)
+        messages.error(request, f"{tr(request, 'err_invalid_code')} · {tr(request, 'err_attempts_left')}: {left}")
 
     return render(request, 'accounts/verify.html', {'phone': phone})
 

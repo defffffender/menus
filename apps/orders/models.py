@@ -42,6 +42,12 @@ class Order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
         ordering = ('-created_at',)
+        indexes = [
+            # доска заказов: активные/закрытые по заведению
+            models.Index(fields=['restaurant', 'status']),
+            # аналитика и история: заказы заведения по времени
+            models.Index(fields=['restaurant', 'created_at']),
+        ]
 
     def __str__(self):
         return f'Заказ №{self.pk}'

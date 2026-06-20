@@ -1,0 +1,33 @@
+{% comment %}
+Drag-and-drop сортировка. Любой контейнер с data-sortable="<url>" становится
+сортируемым; его прямые дети с data-id перетаскиваются за ручку .drag-handle.
+По окончании перетаскивания новый порядок id уходит POST-ом на url.
+{% endcomment %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+(function(){
+  function csrf(){ var m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)'); return m ? m.pop() : ''; }
+  function save(url, el){
+    var ids = Array.prototype.map.call(el.querySelectorAll(':scope > [data-id]'), function(n){ return n.getAttribute('data-id'); });
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+      body: JSON.stringify({ order: ids }),
+    });
+  }
+  function initAll(root){
+    (root || document).querySelectorAll('[data-sortable]').forEach(function(el){
+      if (el._sortable || typeof Sortable === 'undefined') return;
+      el._sortable = new Sortable(el, {
+        handle: '.drag-handle',
+        draggable: '[data-id]',
+        animation: 150,
+        ghostClass: 'opacity-40',
+        onEnd: function(){ save(el.getAttribute('data-sortable'), el); },
+      });
+    });
+  }
+  if (document.readyState !== 'loading') initAll();
+  else document.addEventListener('DOMContentLoaded', function(){ initAll(); });
+})();
+</script>

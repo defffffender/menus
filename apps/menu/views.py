@@ -1,12 +1,38 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from apps.core.translations import tr
 from apps.restaurants.views import _get_restaurant, _shell
 
 from .forms import CategoryForm, DishForm
 from .models import Category, Dish, DishVariant
+
+
+def _parse_order_ids(request):
+    """Список id из JSON-тела {'order': [..]} (для drag-and-drop сортировки)."""
+    try:
+        data = json.loads(request.body or '{}')
+        return [int(x) for x in data.get('order', [])]
+    except (ValueError, TypeError):
+        return []
+
+
+def _apply_sort(objects_by_pk, ids, model):
+    """Проставить sort_order по позиции в ids и сохранить изменившиеся."""
+    changed = []
+    for i, pk in enumerate(ids):
+        obj = objects_by_pk.get(pk)
+        if obj is not None and obj.sort_order != i:
+            obj.sort_order = i
+            changed.append(obj)
+    if changed:
+        model.objects.bulk_update(changed, ['sort_order'])
+    return len(changed)
 
 
 @login_required
@@ -36,6 +62,17 @@ def category_add(request, slug):
             category.save()
             messages.success(request, tr(request, 'menu_cat_created'))
     return redirect('menu:menu', slug=slug)
+
+
+@login_required
+@require_POST
+def category_reorder(request, slug):
+    """Сохранить новый порядок категорий (drag-and-drop)."""
+    restaurant = _get_restaurant(request, slug, perm='menu')
+    ids = _parse_order_ids(request)
+    cats = {c.pk: c for c in restaurant.categories.filter(pk__in=ids)}
+    _apply_sort(cats, ids, Category)
+    return JsonResponse({'ok': True})
 
 
 @login_required
@@ -146,6 +183,17 @@ def dish_add(request, slug):
     ctx['categories'] = restaurant.categories.all()
     ctx['variants'] = []
     return render(request, 'cabinet/dish_form.html', ctx)
+
+
+@login_required
+@require_POST
+def dish_reorder(request, slug):
+    """Сохранить новый порядок блюд внутри категории (drag-and-drop)."""
+    restaurant = _get_restaurant(request, slug, perm='menu')
+    ids = _parse_order_ids(request)
+    dishes = {d.pk: d for d in Dish.objects.filter(pk__in=ids, category__restaurant=restaurant)}
+    _apply_sort(dishes, ids, Dish)
+    return JsonResponse({'ok': True})
 
 
 @login_required

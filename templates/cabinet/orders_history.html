@@ -1,0 +1,68 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.hist_title }}{% endblock %}
+{% block subheading %}{{ t.hist_subtitle }}{% endblock %}
+{% block actions %}
+{% if orders %}
+<a href="?period={{ period }}&export=csv"
+   class="text-sm font-semibold px-4 py-2.5 rounded-xl border border-line bg-white hover:border-brand">{{ t.hist_export }}</a>
+{% endif %}
+{% endblock %}
+{% block content %}
+
+<!-- period filter -->
+<div class="flex flex-wrap items-center gap-2 mb-5">
+  {% for key, label in period_tabs %}
+  <a href="?period={{ key }}"
+     class="text-sm font-semibold px-3.5 py-2 rounded-xl border {% if period == key %}bg-brand text-white border-brand{% else %}bg-white border-line hover:border-brand{% endif %}">{{ label }}</a>
+  {% endfor %}
+  <div class="flex-1"></div>
+  <div class="text-sm text-ink/60">
+    <span class="font-semibold text-ink">{{ total_count }}</span> {{ t.hist_count }}
+    · <span class="font-semibold text-ink tabular-nums">{{ total_revenue }}</span> {{ t.menu_som }} {{ t.hist_revenue }}
+  </div>
+</div>
+
+{% if orders %}
+<div class="bg-white border border-line rounded-2xl divide-y divide-line">
+  {% for order in orders %}
+  <div class="flex items-center gap-4 p-4">
+    <div class="w-12 flex-none">
+      <div class="font-semibold tabular-nums">№{{ order.pk }}</div>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="font-semibold truncate">
+        {% if order.table %}{{ order.table.name }}{% else %}{{ t.ord_no_table }}{% endif %}
+        <span class="text-xs text-ink/40 font-normal">· {{ order.items.all|length }} {{ t.hist_items_short }}</span>
+      </div>
+      <div class="text-xs text-ink/50 truncate">
+        {% for item in order.items.all %}{{ item.name }} ×{{ item.quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}
+      </div>
+    </div>
+    <div class="text-xs text-ink/50 flex-none tabular-nums hidden sm:block">{{ order.created_at|date:'d.m H:i' }}</div>
+    <span class="flex-none text-[11px] font-semibold px-2.5 py-1 rounded-full {% if order.status == 'closed' %}bg-forest/10 text-forest{% else %}bg-red-100 text-red-600{% endif %}">
+      {% if order.status == 'closed' %}{{ t.st_closed }}{% else %}{{ t.st_cancelled }}{% endif %}
+    </span>
+    <div class="text-right flex-none w-24">
+      <div class="font-semibold tabular-nums">{{ order.total }} <span class="text-xs text-ink/40 font-normal">{{ t.menu_som }}</span></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- pagination -->
+{% if page_obj.has_other_pages %}
+<div class="flex items-center justify-center gap-3 mt-5 text-sm">
+  {% if page_obj.has_previous %}
+  <a href="?period={{ period }}&page={{ page_obj.previous_page_number }}" class="font-semibold px-3 py-2 rounded-lg border border-line bg-white hover:border-brand">{{ t.hist_prev }}</a>
+  {% endif %}
+  <span class="text-ink/50">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+  <a href="?period={{ period }}&page={{ page_obj.next_page_number }}" class="font-semibold px-3 py-2 rounded-lg border border-line bg-white hover:border-brand">{{ t.hist_next }}</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="bg-white border border-line rounded-2xl p-12 text-center text-ink/50">{{ t.hist_empty }}</div>
+{% endif %}
+{% endblock %}

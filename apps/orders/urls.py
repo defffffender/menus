@@ -12,6 +12,7 @@ urlpatterns = [
 
     # кабинет
     path('cabinet/<str:slug>/orders/', views.orders, name='orders'),
+    path('cabinet/<str:slug>/orders/history/', views.orders_history, name='history'),
     path('cabinet/<str:slug>/orders/feed/', views.orders_feed, name='feed'),
     path('cabinet/<str:slug>/orders/<int:pk>/status/', views.order_set_status, name='set_status'),
 ]

@@ -1,0 +1,194 @@
+{% extends 'cabinet/base.html' %}
+{% block heading %}{{ t.design_title }}{% endblock %}
+{% block subheading %}{{ t.design_subtitle }}{% endblock %}
+{% block actions %}
+<button type="submit" form="design-form" class="bg-brand text-white text-sm font-semibold px-4 py-2.5 rounded-xl">{{ t.design_save }}</button>
+{% endblock %}
+{% block content %}
+<div x-data="designer()" x-effect="push()"
+     class="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
+
+  <!-- controls -->
+  <form id="design-form" method="post" enctype="multipart/form-data"
+        action="{% url 'restaurants:menu_design' restaurant.slug %}"
+        class="space-y-5 order-2 lg:order-1">
+    {% csrf_token %}
+
+    <!-- hidden inputs carrying choice-state to POST -->
+    <input type="hidden" name="font" :value="font">
+    <input type="hidden" name="card_style" :value="card_style">
+    <input type="hidden" name="radius" :value="radius">
+    <input type="hidden" name="header_layout" :value="header_layout">
+
+    <!-- presets -->
+    <section class="bg-white border border-line rounded-2xl p-5">
+      <h2 class="font-semibold mb-3">{{ t.design_presets }}</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button type="button" @click="preset(presets.classic)" class="border border-line rounded-xl px-3 py-2.5 text-sm font-semibold hover:border-brand">{{ t.design_preset_classic }}</button>
+        <button type="button" @click="preset(presets.dark)" class="border border-line rounded-xl px-3 py-2.5 text-sm font-semibold hover:border-brand">{{ t.design_preset_dark }}</button>
+        <button type="button" @click="preset(presets.minimal)" class="border border-line rounded-xl px-3 py-2.5 text-sm font-semibold hover:border-brand">{{ t.design_preset_minimal }}</button>
+        <button type="button" @click="preset(presets.chaikhana)" class="border border-line rounded-xl px-3 py-2.5 text-sm font-semibold hover:border-brand">{{ t.design_preset_chaikhana }}</button>
+      </div>
+    </section>
+
+    <!-- colors -->
+    <section class="bg-white border border-line rounded-2xl p-5">
+      <h2 class="font-semibold mb-3">{{ t.design_colors }}</h2>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <label class="flex items-center gap-3 border border-line rounded-xl px-3 py-2 cursor-pointer">
+          <input type="color" name="accent" x-model="accent" class="w-9 h-9 rounded-lg border border-line bg-white p-0.5 flex-none">
+          <div class="min-w-0"><div class="text-sm font-semibold">{{ t.design_c_accent }}</div><div class="text-[11px] text-ink/40 font-mono uppercase" x-text="accent"></div></div>
+        </label>
+        <label class="flex items-center gap-3 border border-line rounded-xl px-3 py-2 cursor-pointer">
+          <input type="color" name="bg" x-model="bg" class="w-9 h-9 rounded-lg border border-line bg-white p-0.5 flex-none">
+          <div class="min-w-0"><div class="text-sm font-semibold">{{ t.design_c_bg }}</div><div class="text-[11px] text-ink/40 font-mono uppercase" x-text="bg"></div></div>
+        </label>
+        <label class="flex items-center gap-3 border border-line rounded-xl px-3 py-2 cursor-pointer">
+          <input type="color" name="text" x-model="text" class="w-9 h-9 rounded-lg border border-line bg-white p-0.5 flex-none">
+          <div class="min-w-0"><div class="text-sm font-semibold">{{ t.design_c_text }}</div><div class="text-[11px] text-ink/40 font-mono uppercase" x-text="text"></div></div>
+        </label>
+        <label class="flex items-center gap-3 border border-line rounded-xl px-3 py-2 cursor-pointer">
+          <input type="color" name="card_bg" x-model="card_bg" class="w-9 h-9 rounded-lg border border-line bg-white p-0.5 flex-none">
+          <div class="min-w-0"><div class="text-sm font-semibold">{{ t.design_c_card }}</div><div class="text-[11px] text-ink/40 font-mono uppercase" x-text="card_bg"></div></div>
+        </label>
+      </div>
+    </section>
+
+    <!-- font -->
+    <section class="bg-white border border-line rounded-2xl p-5">
+      <h2 class="font-semibold mb-3">{{ t.design_font }}</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {% for k, label, disp, body, google in fonts %}
+        <button type="button" @click="font='{{ k }}'"
+                :class="font==='{{ k }}' ? 'border-brand ring-2 ring-brand/20' : 'border-line hover:border-brand/50'"
+                class="border rounded-xl px-3 py-2.5 text-left">
+          <div class="text-base font-semibold" style="font-family:{{ disp }}">Aa</div>
+          <div class="text-[11px] text-ink/50 mt-0.5">{{ label }}</div>
+        </button>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- cards -->
+    <section class="bg-white border border-line rounded-2xl p-5">
+      <h2 class="font-semibold mb-3">{{ t.design_cards }}</h2>
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <template x-for="opt in [['list','{{ t.design_card_list }}'],['grid','{{ t.design_card_grid }}'],['compact','{{ t.design_card_compact }}']]" :key="opt[0]">
+          <button type="button" @click="card_style=opt[0]"
+                  :class="card_style===opt[0] ? 'border-brand ring-2 ring-brand/20' : 'border-line hover:border-brand/50'"
+                  class="border rounded-xl px-3 py-2.5 text-sm font-semibold" x-text="opt[1]"></button>
+        </template>
+      </div>
+      <div class="mb-4">
+        <div class="text-xs font-semibold text-ink/60 mb-2">{{ t.design_radius }}</div>
+        <div class="grid grid-cols-4 gap-2">
+          <template x-for="opt in [['none','{{ t.design_radius_none }}'],['sm','{{ t.design_radius_sm }}'],['md','{{ t.design_radius_md }}'],['lg','{{ t.design_radius_lg }}']]" :key="opt[0]">
+            <button type="button" @click="radius=opt[0]"
+                    :class="radius===opt[0] ? 'border-brand ring-2 ring-brand/20' : 'border-line hover:border-brand/50'"
+                    class="border rounded-xl px-2 py-2 text-xs font-semibold" x-text="opt[1]"></button>
+          </template>
+        </div>
+      </div>
+      <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer">
+        <input type="checkbox" name="show_desc" x-model="show_desc" class="w-4 h-4 accent-[#C75B39]">
+        {{ t.design_show_desc }}
+      </label>
+    </section>
+
+    <!-- header / logo -->
+    <section class="bg-white border border-line rounded-2xl p-5">
+      <h2 class="font-semibold mb-3">{{ t.design_header }}</h2>
+
+      <div class="mb-4">
+        <div class="grid grid-cols-2 gap-2">
+          <template x-for="opt in [['left','{{ t.design_h_left }}'],['center','{{ t.design_h_center }}']]" :key="opt[0]">
+            <button type="button" @click="header_layout=opt[0]"
+                    :class="header_layout===opt[0] ? 'border-brand ring-2 ring-brand/20' : 'border-line hover:border-brand/50'"
+                    class="border rounded-xl px-3 py-2.5 text-sm font-semibold" x-text="opt[1]"></button>
+          </template>
+        </div>
+      </div>
+
+      {% if restaurant.logo %}
+      <label class="flex items-center gap-2.5 text-sm font-semibold cursor-pointer mb-4">
+        <input type="checkbox" name="show_logo" x-model="show_logo" class="w-4 h-4 accent-[#C75B39]">
+        {{ t.design_show_logo }}
+      </label>
+      {% else %}
+      <p class="text-xs text-ink/40 mb-4">{{ t.design_no_logo }}</p>
+      {% endif %}
+
+      <div>
+        <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.design_cover }}</label>
+        {% if theme.cover %}
+        <div class="flex items-center gap-3 mb-2">
+          <img src="{{ theme.cover.url }}" alt="" class="w-24 h-12 rounded-lg object-cover border border-line">
+          <label class="flex items-center gap-2 text-xs font-semibold text-red-500 cursor-pointer">
+            <input type="checkbox" name="cover_clear" class="w-3.5 h-3.5 accent-red-500">{{ t.design_cover_remove }}
+          </label>
+        </div>
+        {% endif %}
+        <input type="file" name="cover" accept="image/*" class="text-sm">
+      </div>
+    </section>
+  </form>
+
+  <!-- phone preview -->
+  <div class="order-1 lg:order-2 lg:sticky lg:top-2">
+    <div class="mx-auto w-[330px] max-w-full rounded-[2.4rem] border-[10px] border-night bg-night shadow-xl shadow-night/20 overflow-hidden">
+      <iframe id="preview" title="preview" @load="push()"
+              src="{% url 'restaurants:menu_design_preview' restaurant.slug %}"
+              class="w-full block bg-white" style="height:640px;border:0"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+  function designer(){
+    return {
+      accent: '{{ theme.accent }}',
+      bg: '{{ theme.bg }}',
+      text: '{{ theme.text }}',
+      card_bg: '{{ theme.card_bg }}',
+      font: '{{ theme.font }}',
+      card_style: '{{ theme.card_style }}',
+      radius: '{{ theme.radius }}',
+      header_layout: '{{ theme.header_layout }}',
+      show_desc: {{ theme.show_desc|yesno:'true,false' }},
+      show_logo: {{ theme.show_logo|yesno:'true,false' }},
+      fonts: {
+        {% for k, label, disp, body, google in fonts %}'{{ k }}': { display: "{{ disp|escapejs }}", body: "{{ body|escapejs }}", google: "{{ google|escapejs }}" },
+        {% endfor %}
+      },
+      radii: { none: 0, sm: 8, md: 14, lg: 22 },
+      presets: {
+        classic:   { accent:'#c75b39', bg:'#fbf6ee', text:'#2a2118', card_bg:'#ffffff', font:'classic', card_style:'list',    radius:'lg', header_layout:'left',   show_desc:true,  show_logo:true },
+        dark:      { accent:'#e0a04d', bg:'#1e1a16', text:'#f3ede3', card_bg:'#2a2420', font:'modern',  card_style:'list',    radius:'md', header_layout:'left',   show_desc:true,  show_logo:true },
+        minimal:   { accent:'#2a2118', bg:'#ffffff', text:'#2a2118', card_bg:'#f6f5f2', font:'elegant', card_style:'compact', radius:'sm', header_layout:'center', show_desc:false, show_logo:true },
+        chaikhana: { accent:'#3e5c4a', bg:'#f4efe2', text:'#2a2118', card_bg:'#ffffff', font:'rounded', card_style:'grid',    radius:'lg', header_layout:'center', show_desc:true,  show_logo:true },
+      },
+      preset(p){ Object.assign(this, p); },
+      headerText(hex){
+        var h = (hex || '').replace('#', '');
+        if (h.length !== 6) return '#FFFFFF';
+        var r = parseInt(h.slice(0,2),16)/255, g = parseInt(h.slice(2,4),16)/255, b = parseInt(h.slice(4,6),16)/255;
+        var lin = function(c){ return c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); };
+        var L = 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+        return L > 0.55 ? '#2A2118' : '#FFFFFF';
+      },
+      push(){
+        var f = this.fonts[this.font] || {};
+        var payload = { type: 'theme', theme: {
+          accent: this.accent, bg: this.bg, text: this.text, card_bg: this.card_bg,
+          card_style: this.card_style, radius_px: this.radii[this.radius] || 0,
+          show_desc: this.show_desc, show_logo: this.show_logo, header_layout: this.header_layout,
+          font_display: f.display, font_body: f.body, font_google: f.google,
+          header_text: this.headerText(this.accent),
+        }};
+        var fr = document.getElementById('preview');
+        if (fr && fr.contentWindow) fr.contentWindow.postMessage(payload, '*');
+      },
+    };
+  }
+</script>
+{% endblock %}

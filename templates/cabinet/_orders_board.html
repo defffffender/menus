@@ -14,7 +14,9 @@
     </div>
     <div class="space-y-3">
       {% for order in col.orders %}
-      <div class="bg-white border border-line rounded-2xl p-3.5 {% if order.status == 'new' %}ring-2 ring-brand/40{% endif %}">
+      <div class="bg-white border border-line rounded-2xl p-3.5 {% if order.status == 'new' %}ring-2 ring-brand/40{% endif %}"
+           data-order-id="{{ order.pk }}" data-status="{{ order.status }}"
+           data-table="{% if order.table %}{{ order.table.name }}{% else %}{{ t.ord_no_table }}{% endif %}">
         <div class="flex items-center justify-between mb-2">
           <span class="font-semibold text-sm">№ {{ order.pk }}</span>
           <span class="text-xs text-ink/50">

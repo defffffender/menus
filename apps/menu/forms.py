@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.core.images import downscale_field, validate_image_size
+
 from .models import Category, Dish
 
 
@@ -24,3 +26,15 @@ class DishForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if restaurant is not None:
             self.fields['category'].queryset = restaurant.categories.all()
+
+    def clean_photo(self):
+        photo = self.cleaned_data.get('photo')
+        validate_image_size(photo)
+        return photo
+
+    def save(self, commit=True):
+        obj = super().save(commit=commit)
+        if commit and 'photo' in self.changed_data:
+            downscale_field(obj.photo, max_px=1100)
+            obj.save(update_fields=['photo'])
+        return obj

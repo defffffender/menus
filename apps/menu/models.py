@@ -87,7 +87,9 @@ class Dish(models.Model):
 
     @property
     def has_variants(self):
-        return self.variants.count() > 1
+        # len(...) использует prefetch-кэш (variants уже подгружены в списке меню),
+        # тогда как .count() делал бы лишний запрос на каждое блюдо.
+        return len(self.variants.all()) > 1
 
 
 class DishVariant(models.Model):

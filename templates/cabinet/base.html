@@ -31,6 +31,11 @@
   body{-webkit-user-select:none;-moz-user-select:none;user-select:none}
   /* текстовый курсор и выделение — только в полях ввода */
   input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text!important;-webkit-user-select:text;-moz-user-select:text;user-select:text}
+  /* в контентной области разрешаем выделять/копировать (телефоны, QR-токены, цены) */
+  main{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+  /* ручка перетаскивания */
+  .drag-handle{cursor:grab!important;-webkit-user-select:none;user-select:none}
+  .sortable-chosen .drag-handle,.drag-handle:active{cursor:grabbing!important}
   /* «рука» — на кликабельном */
   a,button,select,summary,[role=button],label[for],input[type=checkbox],input[type=radio],input[type=file],.cursor-pointer{cursor:pointer!important}
   /* плавные переходы для интерактива */
@@ -65,13 +70,23 @@
 </div>
 {% endif %}
 
-<div class="flex min-h-screen">
+<div class="flex min-h-screen" x-data="{ nav: false }">
+
+  <!-- mobile backdrop -->
+  <div x-show="nav" x-cloak @click="nav = false"
+       x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+       class="fixed inset-0 bg-black/40 z-40 lg:hidden"></div>
 
   <!-- SIDEBAR -->
-  <aside class="w-60 flex-none bg-night text-[#C2B6A2] flex flex-col p-4">
-    <a href="{% url 'restaurants:dashboard' restaurant.slug %}" class="flex items-center gap-3 px-2 pb-5">
-      <span class="font-display text-2xl font-semibold text-sand">Menus</span>
-    </a>
+  <aside x-bind:style="nav && 'transform:translateX(0)'"
+         class="fixed lg:static inset-y-0 left-0 z-50 w-60 flex-none bg-night text-[#C2B6A2] flex flex-col p-4 overflow-y-auto transition-transform duration-300 -translate-x-full lg:translate-x-0">
+    <div class="flex items-center justify-between px-2 pb-5">
+      <a href="{% url 'restaurants:dashboard' restaurant.slug %}" class="flex items-center gap-3">
+        <span class="font-display text-2xl font-semibold text-sand">Menus</span>
+      </a>
+      <button type="button" @click="nav = false" class="lg:hidden text-[#9A8C78] hover:text-sand text-3xl leading-none px-1 -mr-1">&times;</button>
+    </div>
 
     <!-- venue switcher -->
     <div class="mb-4" x-data="{ open: false }">
@@ -108,13 +123,17 @@
     </div>
 
     {% with base='inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full' %}
-    <nav class="flex flex-col gap-0.5">
+    <nav class="flex flex-col gap-0.5" @click="nav = false">
       <a href="{% url 'restaurants:dashboard' restaurant.slug %}" class="{{ base }} {% if active == 'dashboard' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_dashboard }}</a>
       {% if 'menu' in perms %}
       <a href="{% url 'menu:menu' restaurant.slug %}" class="{{ base }} {% if active == 'menu' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_menu }}</a>
       {% endif %}
+      {% if 'design' in perms %}
+      <a href="{% url 'restaurants:menu_design' restaurant.slug %}" class="{{ base }} {% if active == 'design' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_design }}</a>
+      {% endif %}
       {% if 'orders' in perms %}
       <a href="{% url 'orders:orders' restaurant.slug %}" class="{{ base }} {% if active == 'orders' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_orders }}</a>
+      <a href="{% url 'orders:history' restaurant.slug %}" class="{{ base }} {% if active == 'history' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_history }}</a>
       {% endif %}
       {% if 'tables' in perms %}
       <a href="{% url 'restaurants:tables' restaurant.slug %}" class="{{ base }} {% if active == 'tables' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_tables }}</a>
@@ -144,10 +163,14 @@
 
   <!-- MAIN -->
   <div class="flex-1 min-w-0 flex flex-col">
-    <header class="h-[72px] flex-none border-b border-line bg-[#FFFCF7] flex items-center gap-4 px-7">
-      <div>
-        <h1 class="font-display text-xl font-semibold leading-none">{% block heading %}{% endblock %}</h1>
-        <div class="text-xs text-ink/50 mt-1">{% block subheading %}{% endblock %}</div>
+    <header class="h-[72px] flex-none border-b border-line bg-[#FFFCF7] flex items-center gap-3 sm:gap-4 px-4 sm:px-7">
+      <button type="button" @click="nav = true"
+              class="lg:hidden -ml-1 w-9 h-9 flex-none flex items-center justify-center rounded-lg border border-line text-ink hover:border-brand">
+        <span class="text-xl leading-none">&#9776;</span>
+      </button>
+      <div class="min-w-0">
+        <h1 class="font-display text-lg sm:text-xl font-semibold leading-none truncate">{% block heading %}{% endblock %}</h1>
+        <div class="text-xs text-ink/50 mt-1 truncate">{% block subheading %}{% endblock %}</div>
       </div>
       <div class="flex-1"></div>
       <div class="flex bg-white border border-line rounded-full p-0.5 text-xs font-semibold">
@@ -159,10 +182,11 @@
       {% block actions %}{% endblock %}
     </header>
 
-    <main class="flex-1 min-h-0 overflow-auto p-7">
+    <main class="flex-1 min-h-0 overflow-auto p-4 sm:p-7">
       {% block content %}{% endblock %}
     </main>
   </div>
 </div>
+{% include 'partials/ui_select.html' %}
 </body>
 </html>

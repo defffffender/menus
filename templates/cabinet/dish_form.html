@@ -72,7 +72,7 @@
     <div class="bg-white border border-line rounded-2xl p-5 grid sm:grid-cols-2 gap-4">
       <div>
         <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.dish_category }}</label>
-        <select name="category" required class="w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
+        <select name="category" required class="ui-select w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
           {% for c in categories %}
           <option value="{{ c.pk }}" {% if form.category.value|stringformat:'s' == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name_ru }}</option>
           {% endfor %}
@@ -84,7 +84,7 @@
       </div>
       <div>
         <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.dish_spiciness }}</label>
-        <select name="spiciness" class="w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
+        <select name="spiciness" class="ui-select w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
           <option value="0" {% if form.spiciness.value == 0 %}selected{% endif %}>{{ t.spicy_0 }}</option>
           <option value="1" {% if form.spiciness.value == 1 %}selected{% endif %}>{{ t.spicy_1 }}</option>
           <option value="2" {% if form.spiciness.value == 2 %}selected{% endif %}>{{ t.spicy_2 }}</option>

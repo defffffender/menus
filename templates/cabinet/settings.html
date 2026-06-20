@@ -14,7 +14,7 @@
     </div>
     <div>
       <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.set_type }}</label>
-      <select name="type" class="w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
+      <select name="type" class="ui-select w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
         <option value="restaurant" {% if form.type.value == 'restaurant' %}selected{% endif %}>{{ t.type_restaurant }}</option>
         <option value="cafe" {% if form.type.value == 'cafe' %}selected{% endif %}>{{ t.type_cafe }}</option>
         <option value="chaikhana" {% if form.type.value == 'chaikhana' %}selected{% endif %}>{{ t.type_chaikhana }}</option>

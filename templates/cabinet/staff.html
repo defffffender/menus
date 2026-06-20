@@ -37,7 +37,7 @@
       </div>
       <div>
         <label class="block text-xs font-semibold text-ink/60 mb-1.5">{{ t.staff_role }}</label>
-        <select name="role" class="w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
+        <select name="role" class="ui-select w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
           {% for value, label in assignable %}
           <option value="{{ value }}">{{ label }}</option>
           {% endfor %}
@@ -71,7 +71,7 @@
         <form method="post" action="{% url 'restaurants:staff_role' restaurant.slug row.m.pk %}" class="flex-none">
           {% csrf_token %}
           <select name="role" onchange="this.form.submit()"
-                  class="text-xs font-semibold border border-line rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:border-brand">
+                  class="ui-select text-xs font-semibold border border-line rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:border-brand">
             <option value="{{ row.m.role }}" selected>{{ row.role_label }}</option>
             {% for value, label in assignable %}
               {% if value != row.m.role %}<option value="{{ value }}">{{ label }}</option>{% endif %}

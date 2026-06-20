@@ -47,13 +47,14 @@ class CabinetOrdersConsumer(AsyncWebsocketConsumer):
             return False
         self.restaurant = r
         self.restaurant_id = r.id
+        self.membership = m
         self.lang = normalize_lang((self.scope.get('session') or {}).get('lang', 'ru'))
         return True
 
     @database_sync_to_async
     def _render(self):
         from .views import _board_context
-        ctx = {**_board_context(self.restaurant, self.lang), **i18n_context(self.lang)}
+        ctx = {**_board_context(self.restaurant, self.lang, self.membership), **i18n_context(self.lang)}
         html = render_to_string('cabinet/_orders_board.html', ctx)
         return f'<div id="board" hx-swap-oob="innerHTML">{html}</div>'
 

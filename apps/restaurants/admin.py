@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Membership, Restaurant, Table
+from .models import Membership, MenuTheme, Restaurant, Table, TableZone
 
 
 class MembershipInline(admin.TabularInline):
@@ -27,9 +27,24 @@ class MembershipAdmin(admin.ModelAdmin):
     autocomplete_fields = ('user', 'restaurant')
 
 
-@admin.register(Table)
-class TableAdmin(admin.ModelAdmin):
-    list_display = ('name', 'restaurant', 'seats', 'is_active', 'sort_order')
-    list_filter = ('is_active', 'restaurant')
+@admin.register(MenuTheme)
+class MenuThemeAdmin(admin.ModelAdmin):
+    list_display = ('restaurant', 'font', 'card_style', 'updated_at')
+    search_fields = ('restaurant__name',)
+    autocomplete_fields = ('restaurant',)
+
+
+@admin.register(TableZone)
+class TableZoneAdmin(admin.ModelAdmin):
+    list_display = ('name', 'restaurant', 'sort_order', 'created_at')
+    list_filter = ('restaurant',)
     search_fields = ('name', 'restaurant__name')
     autocomplete_fields = ('restaurant',)
+
+
+@admin.register(Table)
+class TableAdmin(admin.ModelAdmin):
+    list_display = ('name', 'restaurant', 'zone', 'seats', 'is_active', 'sort_order')
+    list_filter = ('is_active', 'restaurant')
+    search_fields = ('name', 'restaurant__name')
+    autocomplete_fields = ('restaurant', 'zone', 'waiters')

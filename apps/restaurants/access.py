@@ -9,9 +9,9 @@ Role = Membership.Role
 
 # какие зоны доступны каждой роли
 ROLE_PERMS = {
-    Role.OWNER:         {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings'},
-    Role.DIRECTOR:      {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings'},
-    Role.ADMINISTRATOR: {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings'},  # staff — частично (см. ранг)
+    Role.OWNER:         {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings', 'design'},
+    Role.DIRECTOR:      {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings', 'design'},
+    Role.ADMINISTRATOR: {'menu', 'tables', 'orders', 'staff', 'analytics', 'settings', 'design'},  # staff — частично (см. ранг)
     Role.MANAGER:       {'menu', 'tables', 'orders', 'analytics'},
     Role.WAITER:        {'orders'},
     Role.KITCHEN:       {'orders'},

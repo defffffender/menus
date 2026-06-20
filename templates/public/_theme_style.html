@@ -1,0 +1,77 @@
+{% comment %}
+Стили темы гостевого меню. Подключается в <head> публичного меню и превью.
+Тема задаётся через CSS-переменные (:root) и data-атрибуты на <body>
+(data-card / data-desc / data-logo / data-header) — одна разметка, разный вид.
+В режиме preview слушаем postMessage из редактора и обновляем всё вживую.
+{% endcomment %}
+<link id="t-font" rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family={{ theme.font_conf.google }}&display=swap">
+<style>
+  :root{
+    --t-accent: {{ theme.accent }};
+    --t-bg: {{ theme.bg }};
+    --t-text: {{ theme.text }};
+    --t-card: {{ theme.card_bg }};
+    --t-radius: {{ theme.radius_px }}px;
+    --t-font-display: {{ theme.font_conf.display }};
+    --t-font-body: {{ theme.font_conf.body }};
+    --t-header-text: {{ theme.header_text }};
+  }
+  body{ background:var(--t-bg); color:var(--t-text); font-family:var(--t-font-body); }
+  .t-display{ font-family:var(--t-font-display); }
+  .t-header{ background:var(--t-accent); color:var(--t-header-text); }
+  .t-htext{ color:var(--t-header-text); }
+  .t-hsoft{ color:var(--t-header-text); opacity:.7; }
+  .t-hfill{ background:color-mix(in srgb, var(--t-header-text) 16%, transparent); }
+  .t-btn{ background:var(--t-accent); color:#fff; }
+  .t-accent-text{ color:var(--t-accent); }
+  .t-accent-soft{ background:color-mix(in srgb, var(--t-accent) 14%, transparent); color:var(--t-accent); }
+  .t-surface{ background:var(--t-card); }
+  .t-card{ background:var(--t-card); border-radius:var(--t-radius); }
+  .t-chip{ background:var(--t-card); }
+
+  /* карточки блюд: одна разметка, вид по data-card */
+  .t-list{ display:flex; flex-direction:column; gap:.75rem; }
+  .t-dish{ display:flex; overflow:hidden; }
+  .t-photo{ width:7rem; align-self:stretch; object-fit:cover; flex:none; }
+  .t-body{ padding:.875rem; flex:1; min-width:0; }
+
+  body[data-card="grid"] .t-list{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
+  body[data-card="grid"] .t-dish{ flex-direction:column; }
+  body[data-card="grid"] .t-photo{ width:100%; height:8.5rem; }
+  body[data-card="grid"] .t-body{ padding:.75rem; }
+
+  body[data-card="compact"] .t-photo{ display:none; }
+
+  body[data-desc="0"] .t-desc{ display:none; }
+  body[data-logo="0"] .t-logo{ display:none; }
+
+  /* шапка по центру */
+  body[data-header="center"] .t-headrow{ flex-direction:column; text-align:center; }
+  body[data-header="center"] .t-brand{ flex-direction:column; }
+  body[data-header="center"] .t-spacer{ display:none; }
+  body[data-header="center"] .t-langs{ margin-left:auto; margin-right:auto; }
+</style>
+{% if preview %}
+<script>
+  // живое обновление превью из редактора (без перезагрузки)
+  window.addEventListener('message', function(e){
+    var d = e.data; if(!d || d.type !== 'theme') return;
+    var t = d.theme, r = document.documentElement, b = document.body;
+    r.style.setProperty('--t-accent', t.accent);
+    r.style.setProperty('--t-bg', t.bg);
+    r.style.setProperty('--t-text', t.text);
+    r.style.setProperty('--t-card', t.card_bg);
+    r.style.setProperty('--t-radius', (t.radius_px || 0) + 'px');
+    if(t.font_display) r.style.setProperty('--t-font-display', t.font_display);
+    if(t.font_body) r.style.setProperty('--t-font-body', t.font_body);
+    if(t.header_text) r.style.setProperty('--t-header-text', t.header_text);
+    b.dataset.card = t.card_style;
+    b.dataset.desc = t.show_desc ? '1' : '0';
+    b.dataset.logo = t.show_logo ? '1' : '0';
+    b.dataset.header = t.header_layout;
+    var link = document.getElementById('t-font');
+    if(link && t.font_google) link.href = 'https://fonts.googleapis.com/css2?family=' + t.font_google + '&display=swap';
+  });
+</script>
+{% endif %}

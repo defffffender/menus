@@ -152,6 +152,10 @@ STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Ограничение тела запроса (защита от слишком больших POST; файлы валидируются
+# отдельно в формах — до 5 МБ на картинку).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
+
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

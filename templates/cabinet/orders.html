@@ -1,6 +1,12 @@
 {% extends 'cabinet/base.html' %}
 {% block heading %}{{ t.ord_title }}{% endblock %}
 {% block subheading %}{{ t.ord_subtitle }}{% endblock %}
+{% block actions %}
+<button x-data="{ on: localStorage.getItem('ord_sound') !== '0' }"
+        @click="on = !on; localStorage.setItem('ord_sound', on ? '1' : '0'); window.__ordSound && window.__ordSound(on)"
+        x-text="on ? '{{ t.ord_sound_on }}' : '{{ t.ord_sound_off }}'"
+        class="text-sm font-semibold px-4 py-2.5 rounded-xl border border-line bg-white hover:border-brand"></button>
+{% endblock %}
 {% block content %}
 <!-- realtime: WebSocket пушит обновления (OOB-swap по #board);
      HTTP-загрузка даёт мгновенный старт, every 20s — резерв на случай обрыва WS -->
@@ -12,4 +18,73 @@
     <div class="text-ink/40 text-sm">…</div>
   </div>
 </div>
+
+<script>
+  // Звук + браузерное уведомление при появлении нового заказа на доске.
+  (function(){
+    var board = document.getElementById('board');
+    if (!board) return;
+    var seen = new Set();
+    var primed = false;
+    var soundOn = localStorage.getItem('ord_sound') !== '0';
+    var audioCtx = null;
+
+    function unlock(){
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
+      if ('Notification' in window && Notification.permission === 'default') {
+        try { Notification.requestPermission(); } catch (e) {}
+      }
+    }
+    window.__ordSound = function(on){ soundOn = on; if (on) unlock(); };
+
+    function beep(){
+      if (!soundOn || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        [0, 0.22].forEach(function(dt){
+          var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          var t0 = audioCtx.currentTime + dt;
+          o.type = 'sine'; o.frequency.value = 880;
+          o.connect(g); g.connect(audioCtx.destination);
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+          o.start(t0); o.stop(t0 + 0.2);
+        });
+      } catch (e) {}
+    }
+
+    function notify(table){
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      try { new Notification('{{ t.ord_new_order }}', { body: table || '', tag: 'menus-order', renotify: true }); } catch (e) {}
+    }
+
+    function scan(){
+      if (!primed) return;
+      var newcomers = [];
+      board.querySelectorAll('[data-order-id]').forEach(function(c){
+        var id = c.getAttribute('data-order-id');
+        if (!seen.has(id)) {
+          if (c.getAttribute('data-status') === 'new') newcomers.push(c);
+          seen.add(id);
+        }
+      });
+      if (newcomers.length) { beep(); notify(newcomers[0].getAttribute('data-table')); }
+    }
+
+    new MutationObserver(scan).observe(board, { childList: true, subtree: true });
+
+    // первичная заливка доски — засеять без оповещений, затем включить детект
+    setTimeout(function(){
+      board.querySelectorAll('[data-order-id]').forEach(function(c){ seen.add(c.getAttribute('data-order-id')); });
+      primed = true;
+    }, 1500);
+
+    // любой первый клик разблокирует звук (политика автоплея браузеров)
+    if (soundOn) document.addEventListener('click', function once(){ unlock(); document.removeEventListener('click', once); }, { once: true });
+  })();
+</script>
 {% endblock %}
