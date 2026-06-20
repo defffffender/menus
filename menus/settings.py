@@ -106,12 +106,14 @@ else:
 
 
 # Database
+# По умолчанию SQLite (dev). На проде можно переключить на PostgreSQL, задав
+# DATABASE_URL=postgres://user:pass@host:5432/dbname в .env (нужен psycopg).
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db_url(
+        'DATABASE_URL',
+        default=f'sqlite:///{(BASE_DIR / "db.sqlite3").as_posix()}',
+    ),
 }
 
 
@@ -147,6 +149,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = 'static/'
+# Куда collectstatic собирает статику для отдачи nginx-ом на проде.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media (загружаемые файлы: логотипы, фото блюд)
 MEDIA_URL = 'media/'
@@ -159,6 +163,44 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# --- Безопасность на проде (DEBUG=False) ------------------------------------
+# Включается только когда DEBUG выключен, чтобы не мешать локальной разработке.
+# Рассчитано на схему: nginx терминирует HTTPS и проксирует на daphne по HTTP.
+if not DEBUG:
+    # доверяем заголовку от nginx, что исходный запрос был по HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # редирект HTTP→HTTPS. Если разворачиваете по IP без TLS — выключите в .env
+    SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=True)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    # HSTS: заставляет браузер ходить только по HTTPS. Начнём с 30 дней.
+    SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=60 * 60 * 24 * 30)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+
+# --- Логирование ------------------------------------------------------------
+# Пишем в консоль (stdout) — systemd/journald на проде это подхватит.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {'format': '{asctime} {levelname} {name}: {message}', 'style': '{'},
+    },
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'},
+    },
+    'root': {'handlers': ['console'], 'level': 'INFO'},
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        # код подтверждения и ошибки Eskiz
+        'sms': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
+}
 
 
 # --- SMS (Eskiz.uz) ---------------------------------------------------------

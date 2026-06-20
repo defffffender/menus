@@ -15,5 +15,5 @@ channels==4.3.2
 daphne==4.2.2
 channels-redis==4.3.0   # channel layer для прода (dev — InMemory)
 
-# Этап 7 (добавим по ходу): celery, psycopg[binary], django-storages[s3],
-# whitenoise, gunicorn/uvicorn, pgbouncer (внешний).
+# PostgreSQL на проде (по умолчанию SQLite; включается через DATABASE_URL)
+psycopg[binary]==3.2.10

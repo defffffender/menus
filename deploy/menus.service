@@ -1,0 +1,16 @@
+[Unit]
+Description=Menus (Daphne ASGI server)
+After=network.target
+
+[Service]
+User=menus
+Group=menus
+WorkingDirectory=/opt/menus
+# .env читается самим Django (django-environ) из /opt/menus/.env — отдельный
+# EnvironmentFile не нужен.
+ExecStart=/opt/menus/venv/bin/daphne -b 127.0.0.1 -p 8001 menus.asgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
