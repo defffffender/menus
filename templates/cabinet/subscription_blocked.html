@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{% if status == 'suspended' %}{{ t.sub_blocked_title_suspended }}{% else %}{{ t.sub_blocked_title_expired }}{% endif %} — Menus{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white border border-line rounded-3xl p-8 shadow-sm text-center">
+  <div class="w-14 h-14 mx-auto rounded-2xl bg-brand/10 text-brand flex items-center justify-center mb-5">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+    </svg>
+  </div>
+  <h1 class="font-display text-2xl font-semibold mb-2">
+    {% if status == 'suspended' %}{{ t.sub_blocked_title_suspended }}{% else %}{{ t.sub_blocked_title_expired }}{% endif %}
+  </h1>
+  <p class="text-ink/60 leading-relaxed mb-6">{{ t.sub_blocked_text }}</p>
+  <a href="https://t.me/" target="_blank" rel="noopener"
+     class="inline-block bg-brand text-white font-semibold rounded-xl px-6 py-3 hover:opacity-95">{{ t.sub_blocked_contact }}</a>
+  <div class="mt-5">
+    <a href="{% url 'accounts:logout' %}" class="text-sm font-semibold text-ink/40">{{ t.cab_logout }}</a>
+  </div>
+</div>
+{% endblock %}

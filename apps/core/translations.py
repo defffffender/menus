@@ -424,6 +424,14 @@ TR = {
     'err_otp_throttled': {'ru': 'Код уже отправлен. Если не пришёл — подождите минуту и попробуйте снова.', 'uz': 'Kod allaqachon yuborilgan. Kelmasa — bir daqiqa kuting va qayta urinib koʻring.', 'en': 'A code was already sent. If it didn’t arrive, wait a minute and try again.'},
     'err_required':     {'ru': 'Заполните название и телефон', 'uz': 'Nom va telefonni toʻldiring', 'en': 'Fill in name and phone'},
     'err_agree':        {'ru': 'Подтвердите согласие с условиями', 'uz': 'Shartlarga roziligingizni tasdiqlang', 'en': 'Please accept the terms'},
+
+    # подписка
+    'sub_blocked_title_expired':   {'ru': 'Срок подписки истёк', 'uz': 'Obuna muddati tugadi', 'en': 'Subscription expired'},
+    'sub_blocked_title_suspended': {'ru': 'Подписка приостановлена', 'uz': 'Obuna toʻxtatildi', 'en': 'Subscription suspended'},
+    'sub_blocked_text':   {'ru': 'Чтобы снова пользоваться кабинетом и принимать заказы, продлите подписку. Свяжитесь с менеджером Menus.', 'uz': 'Kabinetdan foydalanish va buyurtmalarni qabul qilishni davom ettirish uchun obunani uzaytiring. Menus menejeriga murojaat qiling.', 'en': 'To use the dashboard and take orders again, renew the subscription. Contact your Menus manager.'},
+    'sub_blocked_contact': {'ru': 'Связаться в Telegram', 'uz': 'Telegramda bogʻlanish', 'en': 'Contact on Telegram'},
+    'sub_menu_unavail_title': {'ru': 'Меню временно недоступно', 'uz': 'Menyu vaqtincha mavjud emas', 'en': 'Menu temporarily unavailable'},
+    'sub_menu_unavail_text':  {'ru': 'Заведение сейчас не принимает заказы. Загляните позже.', 'uz': 'Muassasa hozircha buyurtma qabul qilmayapti. Keyinroq qarang.', 'en': 'This venue is not taking orders right now. Please check back later.'},
     'err_phone_uz':     {'ru': 'Введите номер в формате +998 XX XXX-XX-XX', 'uz': 'Raqamni +998 XX XXX-XX-XX koʻrinishida kiriting', 'en': 'Enter the number as +998 XX XXX-XX-XX'},
     'err_invalid_code': {'ru': 'Неверный код', 'uz': 'Notoʻgʻri kod', 'en': 'Invalid code'},
     'err_attempts_left': {'ru': 'осталось попыток', 'uz': 'urinish qoldi', 'en': 'attempts left'},

@@ -67,6 +67,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Тариф владельца: ограничивает число его заведений и блюд в них.
     # Меняется вручную/в админке — оплата подключается отдельно.
     plan = models.CharField('Тариф', max_length=20, choices=Plan.choices, default=Plan.START)
+    # Срок подписки. Пусто = без ограничений (доступ не блокируется).
+    # Дата в прошлом → подписка истекла, доступ закрыт. Управляется в /admin.
+    subscription_until = models.DateField(
+        'Подписка до', null=True, blank=True,
+        help_text='Пусто — без ограничений. Дата в прошлом — подписка истекла, доступ закрыт.',
+    )
+    subscription_suspended = models.BooleanField(
+        'Подписка приостановлена', default=False,
+        help_text='Ручная блокировка доступа независимо от срока.',
+    )
     # Агент — сотрудник, который подключает заведения (заводит им аккаунты).
     # Только агенты (и суперпользователь) создают новые заведения.
     is_agent = models.BooleanField('Агент', default=False)
@@ -109,6 +119,37 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_agent_user(self):
         """Может заводить заведения: агент или суперпользователь."""
         return bool(self.is_agent or self.is_superuser)
+
+    # --- подписка -----------------------------------------------------------
+    @property
+    def subscription_blocked(self):
+        """Доступ к кабинету и гостевому меню закрыт (приостановлена или истекла).
+
+        Внутренние пользователи (суперюзер, сотрудники админки, агенты) не блокируются.
+        """
+        if self.is_superuser or self.is_staff or self.is_agent:
+            return False
+        if self.subscription_suspended:
+            return True
+        if self.subscription_until and self.subscription_until < timezone.localdate():
+            return True
+        return False
+
+    @property
+    def subscription_status(self):
+        """Статус подписки: suspended / unlimited / active / expired."""
+        if self.subscription_suspended:
+            return 'suspended'
+        if not self.subscription_until:
+            return 'unlimited'
+        return 'active' if self.subscription_until >= timezone.localdate() else 'expired'
+
+    @property
+    def subscription_days_left(self):
+        """Сколько дней осталось (None — без срока, отрицательное — просрочено)."""
+        if not self.subscription_until:
+            return None
+        return (self.subscription_until - timezone.localdate()).days
 
 
 class Lead(models.Model):

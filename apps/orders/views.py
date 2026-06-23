@@ -30,9 +30,11 @@ from .services import apply_status_action, place_order
 def create_order(request, qr_token):
     """Гость отправляет корзину → создаётся заказ со статусом «Новый»."""
     table = get_object_or_404(
-        Table.objects.select_related('restaurant'), qr_token=qr_token, is_active=True,
+        Table.objects.select_related('restaurant', 'restaurant__owner'), qr_token=qr_token, is_active=True,
     )
     restaurant = table.restaurant
+    if restaurant.subscription_blocked:
+        return JsonResponse({'ok': False, 'error': 'unavailable'}, status=402)
 
     # стол должен быть «открыт» (визит активен). Закрыт официантом или протух по
     # простою → заказ не принимаем: гость должен заново открыть меню (= новый визит)

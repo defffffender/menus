@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% include 'partials/favicon.html' %}
+<title>{{ t.sub_menu_unavail_title }} — {{ restaurant.name }}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { brand:'#C75B39', sand:'#FBF6EE', ink:'#2A2118', line:'#ECE3D5' },
+    fontFamily: { display:['Spectral','serif'], body:['Golos Text','sans-serif'] }
+  } } }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="font-body bg-sand text-ink min-h-screen flex items-center justify-center px-6">
+  <div class="max-w-sm w-full text-center">
+    <div class="w-16 h-16 mx-auto rounded-2xl bg-brand/10 text-brand flex items-center justify-center mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25v.008v.008m0 7.484h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <div class="font-display text-xl font-semibold mb-1">{{ restaurant.name }}</div>
+    <h1 class="font-display text-2xl font-semibold mb-2">{{ t.sub_menu_unavail_title }}</h1>
+    <p class="text-ink/60 leading-relaxed">{{ t.sub_menu_unavail_text }}</p>
+  </div>
+</body>
+</html>

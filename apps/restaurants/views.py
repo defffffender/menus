@@ -29,6 +29,7 @@ from .access import (
     perms_of,
 )
 from .forms import RestaurantForm, TableForm
+from .middleware import SubscriptionBlocked
 from .models import (
     FONT_PAIRS,
     RADIUS_PX,
@@ -46,12 +47,15 @@ def _get_restaurant(request, slug, perm=None):
     Прячем и отсутствие доступа, и нехватку прав за 404 (не светим существование).
     Найденную роль кладём в `request.membership` для шелла и шаблонов.
     """
-    restaurant = get_object_or_404(Restaurant, slug=slug)
+    restaurant = get_object_or_404(Restaurant.objects.select_related('owner'), slug=slug)
     membership = membership_for(request.user, restaurant)
     if membership is None:
         raise Http404
     if perm is not None and not can(membership, perm):
         raise Http404
+    # подписка владельца истекла/приостановлена → кабинет недоступен
+    if restaurant.subscription_blocked:
+        raise SubscriptionBlocked(restaurant)
     request.membership = membership
     return restaurant
 
@@ -638,10 +642,12 @@ def _build_menu(restaurant, lang):
 def guest_menu(request, qr_token):
     """Публичное меню стола: гость смотрит и собирает корзину (без регистрации)."""
     table = get_object_or_404(
-        Table.objects.select_related('restaurant'),
+        Table.objects.select_related('restaurant', 'restaurant__owner'),
         qr_token=qr_token, is_active=True,
     )
     restaurant = table.restaurant
+    if restaurant.subscription_blocked:
+        return render(request, 'public/menu_unavailable.html', {'restaurant': restaurant}, status=402)
     lang = resolve_lang(request)
     # просмотр меню = «сканирование»: открываем визит, если стол сейчас закрыт.
     # Сам заказ сессию НЕ открывает — поэтому после «Закрыть стол» забытая

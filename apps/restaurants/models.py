@@ -63,6 +63,11 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def subscription_blocked(self):
+        """Заведение отключено из-за подписки владельца (истекла/приостановлена)."""
+        return bool(self.owner_id and self.owner.subscription_blocked)
+
 
 # Пары шрифтов для гостевого меню (display — заголовки, body — текст).
 # google — строка для https://fonts.googleapis.com/css2?family=…
