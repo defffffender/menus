@@ -2,6 +2,7 @@
 from pathlib import Path
 
 import environ
+from django.templatetags.static import static
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -69,6 +70,11 @@ UNFOLD = {
     'SITE_HEADER': 'Menus',
     'SITE_SUBHEADER': 'Платформа · панель управления',
     'SITE_SYMBOL': 'storefront',
+    'SITE_FAVICONS': [
+        {'rel': 'icon', 'type': 'image/svg+xml', 'href': lambda request: static('favicon.svg')},
+        {'rel': 'icon', 'sizes': '32x32', 'type': 'image/png', 'href': lambda request: static('favicon-32.png')},
+        {'rel': 'apple-touch-icon', 'href': lambda request: static('apple-touch-icon.png')},
+    ],
     'SHOW_HISTORY': True,
     'SHOW_VIEW_ON_SITE': False,
     'COLORS': {
