@@ -306,43 +306,47 @@
 
       <!-- form card -->
       <div style="background:#fff;border:1px solid #ECE3D5;border-radius:22px;padding:34px;box-shadow:0 24px 56px rgba(42,33,24,.14);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
-          <div style="font-family:'Spectral',serif;font-size:22px;font-weight:600;">{{ t.reg_title }}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9A8C78;">{{ t.l_reg_step }}</div>
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Spectral',serif;font-size:22px;font-weight:600;">{{ t.lead_title }}</div>
+          <div style="font-size:13px;color:#9A8C78;line-height:1.45;margin-top:5px;">{{ t.lead_subtitle }}</div>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:15px;">
+        <form method="post" action="{% url 'accounts:register' %}" style="display:flex;flex-direction:column;gap:15px;">
+          {% csrf_token %}
           <div>
-            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_name }}</div>
-            <div style="border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;font-weight:500;">Navbahor</div>
+            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.lead_name }}</div>
+            <input name="name" value="{{ values.name }}"
+                   style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
           </div>
           <div>
-            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_type }}</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="padding:9px 15px;border-radius:10px;background:#C75B39;color:#fff;font-size:13px;font-weight:600;">{{ t.type_chaikhana }}</span>
-              <span style="padding:9px 15px;border-radius:10px;background:#FBF6EE;border:1px solid #E3D6C2;color:#6B5E4F;font-size:13px;font-weight:500;">{{ t.type_restaurant }}</span>
-              <span style="padding:9px 15px;border-radius:10px;background:#FBF6EE;border:1px solid #E3D6C2;color:#6B5E4F;font-size:13px;font-weight:500;">{{ t.type_cafe }}</span>
-              <span style="padding:9px 15px;border-radius:10px;background:#FBF6EE;border:1px solid #E3D6C2;color:#6B5E4F;font-size:13px;font-weight:500;">{{ t.type_fastfood }}</span>
-            </div>
+            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.lead_venue }}</div>
+            <input name="venue" value="{{ values.venue }}"
+                   style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
               <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_city }}</div>
-              <div style="border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;display:flex;align-items:center;justify-content:space-between;">{{ t.l_reg_city_ph }} <span style="color:#9A8C78;font-size:11px;">▾</span></div>
+              <input name="city" value="{{ values.city }}" placeholder="{{ t.l_reg_city_ph }}"
+                     style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
             </div>
             <div>
               <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_phone }}</div>
-              <div style="border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;color:#9A8C78;">+998 __ ___ __ __</div>
+              <input name="phone" required data-phone-mask inputmode="tel" maxlength="19" value="{{ values.phone }}"
+                     placeholder="+998 90 123-45-67"
+                     style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
             </div>
           </div>
-          <div style="display:flex;align-items:flex-start;gap:10px;margin-top:2px;">
-            <span style="width:20px;height:20px;border-radius:6px;background:#C75B39;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;">✓</span>
-            <div style="font-size:12.5px;color:#9A8C78;line-height:1.45;">{{ t.l_reg_agree }}</div>
+          <div>
+            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.lead_comment }}</div>
+            <textarea name="comment" rows="2"
+                      style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;resize:vertical;">{{ values.comment }}</textarea>
           </div>
-          <a href="/register/" class="btn" style="display:block;margin-top:6px;text-align:center;padding:15px;border-radius:13px;background:#C75B39;color:#fff;font-size:16px;font-weight:600;box-shadow:0 8px 20px rgba(199,91,57,.26);">{{ t.l_reg_submit }}</a>
+          <button type="submit" class="btn"
+                  style="margin-top:6px;padding:15px;border-radius:13px;background:#C75B39;color:#fff;font-size:16px;font-weight:600;border:none;cursor:pointer;box-shadow:0 8px 20px rgba(199,91,57,.26);">{{ t.lead_submit }}</button>
           <div style="text-align:center;font-size:13px;color:#9A8C78;">{{ t.reg_have_account }} <a href="/login/" style="color:#C75B39;font-weight:600;">{{ t.nav_login }}</a></div>
-        </div>
+        </form>
       </div>
+      {% include 'partials/phone_mask.html' %}
     </div>
   </div>
 
