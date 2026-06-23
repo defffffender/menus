@@ -2,8 +2,9 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from apps.core.translations import tr
@@ -11,6 +12,36 @@ from apps.restaurants.views import _get_restaurant, _shell
 
 from .forms import CategoryForm, DishForm
 from .models import Category, Dish, DishVariant
+
+
+def _is_hx(request):
+    return bool(request.headers.get('HX-Request'))
+
+
+def _render_dish_form(request, restaurant, form, dish=None, variants=None, error=None):
+    """Форма блюда: фрагмент для drawer'а (HTMX) или полная страница (fallback)."""
+    ctx = {
+        'form': form,
+        'dish': dish,
+        'restaurant': restaurant,
+        'categories': restaurant.categories.all(),
+        'variants': variants if variants is not None else [],
+        'drawer_error': error,
+    }
+    if _is_hx(request):
+        return render(request, 'cabinet/_dish_drawer.html', ctx)
+    full = _shell(request, restaurant, 'menu')
+    full.update(ctx)
+    return render(request, 'cabinet/dish_form.html', full)
+
+
+def _dish_saved_response(request, slug):
+    """После сохранения из drawer'а — перезагрузить страницу меню (HX-Redirect)."""
+    if _is_hx(request):
+        resp = HttpResponse(status=204)
+        resp['HX-Redirect'] = reverse('menu:menu', args=[slug])
+        return resp
+    return redirect('menu:menu', slug=slug)
 
 
 def _parse_order_ids(request):
@@ -37,15 +68,37 @@ def _apply_sort(objects_by_pk, ids, model):
 
 @login_required
 def menu(request, slug):
-    """Список меню: категории с вложенными блюдами."""
+    """Список меню: категории с вложенными блюдами + KPI-полоса дня."""
+    from django.db.models import F, Sum
+    from django.utils import timezone
+
+    from apps.orders.models import Order, OrderItem
+    from apps.restaurants.views import _money
+
     restaurant = _get_restaurant(request, slug, perm='menu')
     ctx = _shell(request, restaurant, 'menu')
-    ctx['categories'] = (
-        restaurant.categories
-        .prefetch_related('dishes__variants')
-        .all()
-    )
+    categories = restaurant.categories.prefetch_related('dishes__variants').all()
+    ctx['categories'] = categories
     ctx['dishes_count'] = Dish.objects.filter(category__restaurant=restaurant).count()
+    ctx['categories_count'] = len(categories)
+    ctx['available_count'] = Dish.objects.filter(category__restaurant=restaurant, is_available=True).count()
+
+    # KPI за сегодня (как нод к дашборду в макете)
+    today = timezone.localdate()
+    today_orders = restaurant.orders.filter(created_at__date=today).exclude(status=Order.Status.CANCELLED)
+    oc = today_orders.count()
+    rev = OrderItem.objects.filter(order__in=today_orders).aggregate(s=Sum(F('price') * F('quantity')))['s'] or 0
+    top = (
+        OrderItem.objects.filter(order__in=today_orders)
+        .values('name').annotate(q=Sum('quantity')).order_by('-q').first()
+    )
+    ctx['kpi'] = {
+        'orders': oc,
+        'revenue': _money(rev),
+        'avg': _money(rev // oc if oc else 0),
+        'top_name': top['name'] if top else '',
+        'top_qty': top['q'] if top else 0,
+    }
     return render(request, 'cabinet/menu.html', ctx)
 
 
@@ -159,30 +212,27 @@ def dish_add(request, slug):
     if request.method == 'POST':
         if _dish_limit_reached(restaurant):
             messages.error(request, tr(request, 'plan_limit_dishes'))
-            return redirect('menu:menu', slug=slug)
+            return _dish_saved_response(request, slug)
         form = DishForm(request.POST, request.FILES, restaurant=restaurant)
         if form.is_valid() and _has_price(request):
             dish = form.save()
             _save_variants(request, dish)
             messages.success(request, tr(request, 'menu_dish_created'))
-            return redirect('menu:menu', slug=slug)
-        if not _has_price(request):
-            messages.error(request, tr(request, 'menu_need_price'))
-    else:
-        if _dish_limit_reached(restaurant):
-            messages.error(request, tr(request, 'plan_limit_dishes'))
-            return redirect('menu:menu', slug=slug)
-        # предвыбор категории при переходе «+ блюдо» из конкретной категории
-        initial = {}
-        cat_id = request.GET.get('category')
-        if cat_id and restaurant.categories.filter(pk=cat_id).exists():
-            initial['category'] = cat_id
-        form = DishForm(restaurant=restaurant, initial=initial)
-    ctx = _shell(request, restaurant, 'menu')
-    ctx['form'] = form
-    ctx['categories'] = restaurant.categories.all()
-    ctx['variants'] = []
-    return render(request, 'cabinet/dish_form.html', ctx)
+            return _dish_saved_response(request, slug)
+        err = tr(request, 'menu_need_price') if not _has_price(request) else None
+        if err and not _is_hx(request):
+            messages.error(request, err)
+        return _render_dish_form(request, restaurant, form, error=err)
+    if _dish_limit_reached(restaurant):
+        messages.error(request, tr(request, 'plan_limit_dishes'))
+        return _dish_saved_response(request, slug)
+    # предвыбор категории при переходе «+ блюдо» из конкретной категории
+    initial = {}
+    cat_id = request.GET.get('category')
+    if cat_id and restaurant.categories.filter(pk=cat_id).exists():
+        initial['category'] = cat_id
+    form = DishForm(restaurant=restaurant, initial=initial)
+    return _render_dish_form(request, restaurant, form)
 
 
 @login_required
@@ -206,17 +256,13 @@ def dish_edit(request, slug, pk):
             dish = form.save()
             _save_variants(request, dish)
             messages.success(request, tr(request, 'menu_saved'))
-            return redirect('menu:menu', slug=slug)
-        if not _has_price(request):
-            messages.error(request, tr(request, 'menu_need_price'))
-    else:
-        form = DishForm(instance=dish, restaurant=restaurant)
-    ctx = _shell(request, restaurant, 'menu')
-    ctx['form'] = form
-    ctx['dish'] = dish
-    ctx['categories'] = restaurant.categories.all()
-    ctx['variants'] = dish.variants.all()
-    return render(request, 'cabinet/dish_form.html', ctx)
+            return _dish_saved_response(request, slug)
+        err = tr(request, 'menu_need_price') if not _has_price(request) else None
+        if err and not _is_hx(request):
+            messages.error(request, err)
+        return _render_dish_form(request, restaurant, form, dish=dish, variants=dish.variants.all(), error=err)
+    form = DishForm(instance=dish, restaurant=restaurant)
+    return _render_dish_form(request, restaurant, form, dish=dish, variants=dish.variants.all())
 
 
 @login_required
@@ -237,4 +283,7 @@ def dish_toggle(request, slug, pk):
     if request.method == 'POST':
         dish.is_available = not dish.is_available
         dish.save(update_fields=['is_available'])
+    # для HTMX возвращаем только обновлённый тумблер (без перезагрузки страницы)
+    if request.headers.get('HX-Request'):
+        return render(request, 'cabinet/_dish_toggle.html', {'dish': dish, 'restaurant': restaurant})
     return redirect('menu:menu', slug=slug)

@@ -1,0 +1,136 @@
+<form enctype="multipart/form-data"
+      action="{% if dish %}{% url 'menu:dish_edit' restaurant.slug dish.pk %}{% else %}{% url 'menu:dish_add' restaurant.slug %}{% endif %}"
+      hx-post="{% if dish %}{% url 'menu:dish_edit' restaurant.slug dish.pk %}{% else %}{% url 'menu:dish_add' restaurant.slug %}{% endif %}"
+      hx-target="#dish-drawer-body" hx-swap="innerHTML" hx-encoding="multipart/form-data"
+      class="flex flex-col h-full"
+      x-data="{ lang:'ru', preview: '{% if dish.photo %}{{ dish.photo.url }}{% endif %}',
+                variants: [{% for v in variants %}{ id:'{{ v.pk }}', ru:'{{ v.name_ru|escapejs }}', uz:'{{ v.name_uz|escapejs }}', en:'{{ v.name_en|escapejs }}', price:'{{ v.price }}' }{% if not forloop.last %},{% endif %}{% endfor %}],
+                addVariant(){ this.variants.push({id:'',ru:'',uz:'',en:'',price:''}) },
+                removeVariant(i){ this.variants.splice(i,1); if(this.variants.length===0) this.addVariant() } }"
+      x-init="if(variants.length===0) addVariant()">
+  {% csrf_token %}
+
+  <!-- header -->
+  <div class="px-5 py-4 border-b border-line flex items-center justify-between flex-none">
+    <div class="font-display text-lg font-semibold">{% if dish %}{{ t.menu_edit_dish }}{% else %}{{ t.dish_new }}{% endif %}</div>
+    <button type="button" @click="$dispatch('close-drawer')" class="text-ink/40 hover:text-brand text-lg leading-none">✕</button>
+  </div>
+
+  <!-- body -->
+  <div class="flex-1 overflow-auto px-5 py-5 space-y-4">
+    {% if drawer_error %}
+    <div class="rounded-xl px-3.5 py-2.5 text-sm bg-red-50 text-red-700 border border-red-200">{{ drawer_error }}</div>
+    {% endif %}
+
+    <!-- photo -->
+    <div>
+      <div class="text-xs font-semibold text-ink/60 mb-2">{{ t.dish_photo }}</div>
+      <label class="block h-32 rounded-2xl border-[1.5px] border-dashed border-[#DACBB4] bg-[#F6EFE2] overflow-hidden cursor-pointer hover:border-brand relative">
+        <template x-if="preview"><img :src="preview" class="w-full h-full object-cover" alt=""></template>
+        <template x-if="!preview">
+          <span class="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-ink/40">
+            <span class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-brand text-xl">+</span>
+            <span class="font-mono text-[10px]">{{ t.dish_photo_hint }}</span>
+          </span>
+        </template>
+        <input type="file" name="photo" accept="image/*" {% if not dish %}required{% endif %}
+               class="hidden" @change="preview = URL.createObjectURL($event.target.files[0])">
+      </label>
+      {% if form.photo.errors %}<p class="text-xs text-red-600 mt-1">{{ form.photo.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- name + description with language tabs -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs font-semibold text-ink/60">{{ t.dish_name }}</div>
+        <div class="flex bg-sand border border-line rounded-full p-0.5 text-[10px] font-semibold">
+          <button type="button" @click="lang='ru'" :class="lang==='ru' ? 'bg-brand text-white' : 'text-ink/50'" class="px-2.5 py-1 rounded-full">RU</button>
+          <button type="button" @click="lang='uz'" :class="lang==='uz' ? 'bg-brand text-white' : 'text-ink/50'" class="px-2.5 py-1 rounded-full">UZ</button>
+          <button type="button" @click="lang='en'" :class="lang==='en' ? 'bg-brand text-white' : 'text-ink/50'" class="px-2.5 py-1 rounded-full">EN</button>
+        </div>
+      </div>
+      <div x-show="lang==='ru'" class="space-y-2">
+        <input name="name_ru" required value="{{ form.name_ru.value|default:'' }}" placeholder="{{ t.dish_name }} (RU)" class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+        <textarea name="description_ru" rows="2" placeholder="{{ t.dish_description }} (RU)" class="w-full border border-line rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand">{{ form.description_ru.value|default:'' }}</textarea>
+      </div>
+      <div x-show="lang==='uz'" x-cloak class="space-y-2">
+        <input name="name_uz" value="{{ form.name_uz.value|default:'' }}" placeholder="{{ t.dish_name }} (UZ)" class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+        <textarea name="description_uz" rows="2" placeholder="{{ t.dish_description }} (UZ)" class="w-full border border-line rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand">{{ form.description_uz.value|default:'' }}</textarea>
+      </div>
+      <div x-show="lang==='en'" x-cloak class="space-y-2">
+        <input name="name_en" value="{{ form.name_en.value|default:'' }}" placeholder="{{ t.dish_name }} (EN)" class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+        <textarea name="description_en" rows="2" placeholder="{{ t.dish_description }} (EN)" class="w-full border border-line rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand">{{ form.description_en.value|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <!-- category + weight -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <div class="text-xs font-semibold text-ink/60 mb-2">{{ t.dish_category }}</div>
+        <select name="category" required class="ui-select w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
+          {% for c in categories %}
+          <option value="{{ c.pk }}" {% if form.category.value|stringformat:'s' == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name_ru }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-ink/60 mb-2">{{ t.dish_weight }}</div>
+        <input name="weight" value="{{ form.weight.value|default:'' }}" placeholder="250 г / 0.5 л" class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+    </div>
+
+    <!-- spiciness + prep time -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <div class="text-xs font-semibold text-ink/60 mb-2">{{ t.dish_spiciness }}</div>
+        <select name="spiciness" class="ui-select w-full border border-line rounded-xl px-3.5 py-2.5 bg-white focus:outline-none focus:border-brand">
+          <option value="0" {% if form.spiciness.value == 0 %}selected{% endif %}>{{ t.spicy_0 }}</option>
+          <option value="1" {% if form.spiciness.value == 1 %}selected{% endif %}>{{ t.spicy_1 }}</option>
+          <option value="2" {% if form.spiciness.value == 2 %}selected{% endif %}>{{ t.spicy_2 }}</option>
+          <option value="3" {% if form.spiciness.value == 3 %}selected{% endif %}>{{ t.spicy_3 }}</option>
+        </select>
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-ink/60 mb-2">{{ t.dish_prep_time }}</div>
+        <input name="prep_time" type="number" min="0" value="{{ form.prep_time.value|default:'' }}" class="w-full border border-line rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-brand">
+      </div>
+    </div>
+
+    <!-- variants -->
+    <div>
+      <div class="text-xs font-semibold text-ink/60 mb-1">{{ t.dish_variants }}</div>
+      <p class="text-[11px] text-ink/40 mb-2">{{ t.dish_variants_hint }}</p>
+      <div class="space-y-2">
+        <template x-for="(v, i) in variants" :key="i">
+          <div class="flex items-center gap-2">
+            <input type="hidden" name="v_id" :value="v.id">
+            <input name="v_name_ru" x-model="v.ru" placeholder="{{ t.dish_variant_name }}" class="flex-1 min-w-0 border border-line rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-brand">
+            <input name="v_name_uz" x-model="v.uz" placeholder="UZ" class="w-12 border border-line rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-brand">
+            <input name="v_name_en" x-model="v.en" placeholder="EN" class="w-12 border border-line rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-brand">
+            <input name="v_price" x-model="v.price" type="number" min="0" required placeholder="{{ t.dish_price }}" class="w-24 border border-line rounded-lg px-2.5 py-2 text-sm tabular-nums focus:outline-none focus:border-brand">
+            <button type="button" @click="removeVariant(i)" class="w-8 h-8 flex-none rounded-lg text-red-500 hover:bg-red-50">✕</button>
+          </div>
+        </template>
+      </div>
+      <button type="button" @click="addVariant()" class="mt-2 text-sm font-semibold text-brand">{{ t.dish_add_variant }}</button>
+    </div>
+
+    <!-- availability -->
+    <label class="flex items-center justify-between bg-forest/10 rounded-xl px-4 py-3 cursor-pointer">
+      <div>
+        <div class="text-sm font-semibold text-ink">{{ t.dish_available }}</div>
+        <div class="text-[11px] text-forest/80">{{ t.set_show_guests|default:'' }}</div>
+      </div>
+      <input type="checkbox" name="is_available" {% if form.is_available.value %}checked{% endif %} class="sr-only peer">
+      <span class="w-[42px] h-6 rounded-full bg-[#C7B9A3] peer-checked:bg-forest relative transition flex-none">
+        <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition peer-checked:translate-x-[18px]"></span>
+      </span>
+    </label>
+  </div>
+
+  <!-- footer -->
+  <div class="px-5 py-4 border-t border-line flex gap-2.5 flex-none">
+    <button type="button" @click="$dispatch('close-drawer')" class="flex-1 text-center py-3 rounded-xl border border-line font-semibold text-sm">{{ t.menu_cancel }}</button>
+    <button type="submit" class="flex-[1.4] text-center py-3 rounded-xl bg-brand text-white font-semibold text-sm shadow-[0_4px_12px_rgba(199,91,57,.24)]">{{ t.menu_save }}</button>
+  </div>
+</form>

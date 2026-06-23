@@ -1,9 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
+from unfold.admin import TabularInline as UnfoldTabularInline
 
 from .models import Order, OrderItem
 
 
-class OrderItemInline(admin.TabularInline):
+class OrderItemInline(UnfoldTabularInline):
     model = OrderItem
     extra = 0
     readonly_fields = ('name', 'price', 'quantity', 'variant')
@@ -11,7 +13,7 @@ class OrderItemInline(admin.TabularInline):
 
 
 @admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
+class OrderAdmin(UnfoldModelAdmin):
     list_display = ('pk', 'restaurant', 'table', 'status', 'created_at')
     list_filter = ('status', 'restaurant')
     search_fields = ('pk', 'restaurant__name')
@@ -20,6 +22,6 @@ class OrderAdmin(admin.ModelAdmin):
 
 
 @admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
+class OrderItemAdmin(UnfoldModelAdmin):
     list_display = ('order', 'name', 'price', 'quantity')
     search_fields = ('name', 'order__pk')

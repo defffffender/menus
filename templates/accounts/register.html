@@ -1,22 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}{{ t.reg_title }} — Menus{% endblock %}
+{% block title %}{{ t.lead_title }} — Menus{% endblock %}
 {% block content %}
 <div class="max-w-md mx-auto bg-white border border-line rounded-3xl p-8 shadow-sm">
-  <h1 class="font-display text-2xl font-semibold mb-6">{{ t.reg_title }}</h1>
+  <h1 class="font-display text-2xl font-semibold mb-1">{{ t.lead_title }}</h1>
+  <p class="text-ink/50 text-sm mb-6">{{ t.lead_subtitle }}</p>
   <form method="post" action="{% url 'accounts:register' %}" class="space-y-4">
     {% csrf_token %}
     <div>
-      <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.reg_name }}</label>
-      <input name="name" required value="{{ values.name }}" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
+      <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.lead_name }}</label>
+      <input name="name" value="{{ values.name }}" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
     </div>
     <div>
-      <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.reg_type }}</label>
-      <select name="type" class="ui-select w-full border border-line rounded-xl px-4 py-3 bg-white focus:outline-none focus:border-brand">
-        <option value="restaurant" {% if values.type == 'restaurant' %}selected{% endif %}>{{ t.type_restaurant }}</option>
-        <option value="cafe" {% if values.type == 'cafe' %}selected{% endif %}>{{ t.type_cafe }}</option>
-        <option value="chaikhana" {% if values.type == 'chaikhana' %}selected{% endif %}>{{ t.type_chaikhana }}</option>
-        <option value="fastfood" {% if values.type == 'fastfood' %}selected{% endif %}>{{ t.type_fastfood }}</option>
-      </select>
+      <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.lead_venue }}</label>
+      <input name="venue" value="{{ values.venue }}" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
     </div>
     <div class="grid grid-cols-2 gap-3">
       <div>
@@ -28,17 +24,11 @@
         <input name="phone" required data-phone-mask inputmode="tel" maxlength="19" value="{{ values.phone }}" placeholder="+998 90 123-45-67" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.reg_password }}</label>
-        <input name="password" type="password" required autocomplete="new-password" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.reg_password2 }}</label>
-        <input name="password2" type="password" required autocomplete="new-password" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">
-      </div>
+    <div>
+      <label class="block text-sm font-semibold text-ink/70 mb-1.5">{{ t.lead_comment }}</label>
+      <textarea name="comment" rows="2" class="w-full border border-line rounded-xl px-4 py-3 focus:outline-none focus:border-brand">{{ values.comment }}</textarea>
     </div>
-    <button class="w-full bg-brand text-white font-semibold rounded-xl py-3.5 hover:opacity-95">{{ t.reg_submit }}</button>
+    <button class="w-full bg-brand text-white font-semibold rounded-xl py-3.5 hover:opacity-95">{{ t.lead_submit }}</button>
   </form>
   <p class="text-center text-sm text-ink/50 mt-5">{{ t.reg_have_account }}
     <a href="{% url 'accounts:login' %}" class="text-brand font-semibold">{{ t.nav_login }}</a>

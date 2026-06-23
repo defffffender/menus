@@ -29,6 +29,14 @@ class Restaurant(models.Model):
         related_name='owned_restaurants',
         verbose_name='Владелец',
     )
+    # Какой агент подключил заведение (если через агентский кабинет).
+    registered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='registered_restaurants',
+        verbose_name='Подключил агент',
+        null=True, blank=True,
+    )
     # Бренд-имя обычно не переводят, поэтому одно поле.
     name = models.CharField('Название', max_length=150)
     # slug адресует тенанта по пути (menus.uz/r/<slug>); тот же slug подойдёт
@@ -97,6 +105,7 @@ class MenuTheme(models.Model):
         LIST = 'list', 'Список с фото'
         GRID = 'grid', 'Плитка'
         COMPACT = 'compact', 'Компактный'
+        FEATURED = 'featured', 'Крупные фото'
 
     class Radius(models.TextChoices):
         NONE = 'none', 'Прямые углы'

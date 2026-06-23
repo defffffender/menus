@@ -67,6 +67,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Тариф владельца: ограничивает число его заведений и блюд в них.
     # Меняется вручную/в админке — оплата подключается отдельно.
     plan = models.CharField('Тариф', max_length=20, choices=Plan.choices, default=Plan.START)
+    # Агент — сотрудник, который подключает заведения (заводит им аккаунты).
+    # Только агенты (и суперпользователь) создают новые заведения.
+    is_agent = models.BooleanField('Агент', default=False)
     is_active = models.BooleanField('Активен', default=True)
     is_staff = models.BooleanField('Доступ в админку', default=False)
     date_joined = models.DateTimeField('Дата регистрации', default=timezone.now)
@@ -101,6 +104,32 @@ class User(AbstractBaseUser, PermissionsMixin):
     def can_add_venue(self):
         limit = self.venue_limit
         return limit is None or self.venues_used < limit
+
+    @property
+    def is_agent_user(self):
+        """Может заводить заведения: агент или суперпользователь."""
+        return bool(self.is_agent or self.is_superuser)
+
+
+class Lead(models.Model):
+    """Заявка с лендинга «Оставить заявку» (самостоятельной регистрации нет).
+    Менеджер/агент перезванивает и подключает заведение вручную."""
+
+    full_name = models.CharField('Имя', max_length=150, blank=True)
+    phone = models.CharField('Телефон', max_length=20)
+    venue_name = models.CharField('Заведение', max_length=150, blank=True)
+    city = models.CharField('Город', max_length=80, blank=True)
+    comment = models.TextField('Комментарий', blank=True)
+    is_processed = models.BooleanField('Обработана', default=False)
+    created_at = models.DateTimeField('Создана', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Заявка'
+        verbose_name_plural = 'Заявки'
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return f'{self.venue_name or self.full_name} · {self.phone}'
 
 
 class PhoneOTP(models.Model):

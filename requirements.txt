@@ -17,3 +17,6 @@ channels-redis==4.3.0   # channel layer для прода (dev — InMemory)
 
 # PostgreSQL на проде (по умолчанию SQLite; включается через DATABASE_URL)
 psycopg[binary]==3.2.10
+
+# Современная тема админки (только оформление, логика не меняется)
+django-unfold==0.98.0

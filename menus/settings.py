@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     # daphne должен быть выше staticfiles — даёт ASGI-runserver (WebSocket в dev)
     'daphne',
 
+    # современная тема админки (обязательно ДО django.contrib.admin)
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,6 +61,33 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
+
+# ===== Внешний вид админки (django-unfold) =====
+# Логика админки не меняется — только оформление в фирменной палитре Menus.
+UNFOLD = {
+    'SITE_TITLE': 'Menus admin',
+    'SITE_HEADER': 'Menus',
+    'SITE_SUBHEADER': 'Платформа · панель управления',
+    'SITE_SYMBOL': 'storefront',
+    'SHOW_HISTORY': True,
+    'SHOW_VIEW_ON_SITE': False,
+    'COLORS': {
+        # фирменный «глиняно-оранжевый» #C75B39 как primary
+        'primary': {
+            '50': '251 241 236',
+            '100': '246 224 214',
+            '200': '236 194 174',
+            '300': '224 160 132',
+            '400': '214 126 92',
+            '500': '199 91 57',
+            '600': '177 78 48',
+            '700': '147 64 38',
+            '800': '118 52 31',
+            '900': '94 43 27',
+            '950': '52 22 13',
+        },
+    },
+}
 
 LOGIN_URL = '/login/'
 

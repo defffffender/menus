@@ -307,8 +307,17 @@ def _board_context(restaurant, lang, membership=None):
         by_status[order.status].append(order)
         total_active += 1
 
+    # акцентные цвета колонок/кнопок (как в дизайне доски)
+    ACCENT = {'new': '#C75B39', 'accepted': '#E0A04D', 'cooking': '#E0A04D', 'served': '#3E5C4A'}
+    BTN = {'new': '#C75B39', 'accepted': '#3E5C4A', 'cooking': '#3E5C4A', 'served': '#241C14'}
     columns = [
-        {'key': st, 'label': translate(lang, f'st_{st}'), 'orders': by_status[st]}
+        {
+            'key': st,
+            'label': translate(lang, f'st_{st}'),
+            'orders': by_status[st],
+            'accent': ACCENT.get(st, '#C75B39'),
+            'btn': BTN.get(st, '#3E5C4A'),
+        }
         for st in Order.FLOW
     ]
     # сегодняшние закрытые — просто счётчик (с тем же фильтром по столам)

@@ -72,8 +72,8 @@
     <!-- cards -->
     <section class="bg-white border border-line rounded-2xl p-5">
       <h2 class="font-semibold mb-3">{{ t.design_cards }}</h2>
-      <div class="grid grid-cols-3 gap-2 mb-4">
-        <template x-for="opt in [['list','{{ t.design_card_list }}'],['grid','{{ t.design_card_grid }}'],['compact','{{ t.design_card_compact }}']]" :key="opt[0]">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+        <template x-for="opt in [['list','{{ t.design_card_list }}'],['grid','{{ t.design_card_grid }}'],['compact','{{ t.design_card_compact }}'],['featured','{{ t.design_card_featured }}']]" :key="opt[0]">
           <button type="button" @click="card_style=opt[0]"
                   :class="card_style===opt[0] ? 'border-brand ring-2 ring-brand/20' : 'border-line hover:border-brand/50'"
                   class="border rounded-xl px-3 py-2.5 text-sm font-semibold" x-text="opt[1]"></button>

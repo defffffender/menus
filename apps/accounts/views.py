@@ -8,10 +8,17 @@ from apps.core.translations import tr
 from apps.restaurants.models import Membership, Restaurant
 from apps.restaurants.utils import unique_slug
 
-from .models import User, is_valid_uz_phone, normalize_phone
+from .models import Lead, User, is_valid_uz_phone, normalize_phone
 from .services import attempts_left, issue_otp, otp_cooldown, verify_otp
 
 AUTH_BACKEND = 'django.contrib.auth.backends.ModelBackend'
+
+
+def _post_login_redirect(user):
+    """Куда отправить после входа: агента — в агентский кабинет."""
+    if getattr(user, 'is_agent_user', False):
+        return redirect('accounts:agent_dashboard')
+    return redirect('restaurants:cabinet')
 
 
 def _password_error(request, pw, pw2, phone=None):
@@ -30,51 +37,37 @@ def _password_error(request, pw, pw2, phone=None):
 
 
 def register(request):
-    # SMS-код тратим только здесь и при восстановлении; вход — по паролю.
+    """Самостоятельной регистрации нет. Эта страница — форма «Оставить заявку»:
+    сохраняем лид, дальше менеджер/агент перезванивает и подключает заведение."""
     if request.user.is_authenticated:
-        return redirect('restaurants:cabinet')
+        return _post_login_redirect(request.user)
     values = {}
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        rtype = request.POST.get('type', '').strip() or Restaurant.Type.RESTAURANT
+        name = request.POST.get('name', '').strip()        # имя контакта
+        venue = request.POST.get('venue', '').strip()       # название заведения
         city = request.POST.get('city', '').strip()
         phone = request.POST.get('phone', '').strip()
-        pw = request.POST.get('password', '')
-        pw2 = request.POST.get('password2', '')
-        nphone = normalize_phone(phone)
-        values = {'name': name, 'type': rtype, 'city': city, 'phone': phone}
+        comment = request.POST.get('comment', '').strip()
+        values = {'name': name, 'venue': venue, 'city': city, 'phone': phone, 'comment': comment}
 
-        pw_err = _password_error(request, pw, pw2, phone)
-        if not name or not phone:
+        if not phone:
             messages.error(request, tr(request, 'err_required'))
         elif not is_valid_uz_phone(phone):
             messages.error(request, tr(request, 'err_phone_uz'))
-        elif User.objects.filter(phone=nphone).exists():
-            # один номер — один аккаунт; новые заведения добавляются в кабинете
-            messages.error(request, tr(request, 'reg_exists'))
-            return redirect('accounts:login')
-        elif pw_err:
-            messages.error(request, pw_err)
         else:
-            # пароль кладём в серверную сессию (БД-бэкенд) до подтверждения кода
-            request.session['reg_data'] = {
-                'name': name, 'type': rtype, 'city': city, 'phone': phone, 'password': pw,
-            }
-            request.session['otp_phone'] = nphone
-            request.session['otp_mode'] = 'register'
-            if otp_cooldown(nphone):
-                messages.info(request, tr(request, 'err_otp_throttled'))
-            else:
-                issue_otp(phone, 'register')
-                messages.success(request, tr(request, 'msg_code_sent'))
-            return redirect('accounts:verify')
+            Lead.objects.create(
+                full_name=name, venue_name=venue, city=city,
+                phone=normalize_phone(phone), comment=comment,
+            )
+            messages.success(request, tr(request, 'lead_sent'))
+            return redirect('accounts:login')
     return render(request, 'accounts/register.html', {'values': values})
 
 
 def login_view(request):
     # Вход по телефону + паролю (без SMS).
     if request.user.is_authenticated:
-        return redirect('restaurants:cabinet')
+        return _post_login_redirect(request.user)
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
         pw = request.POST.get('password', '')
@@ -82,7 +75,7 @@ def login_view(request):
         user = authenticate(request, username=nphone, password=pw)
         if user is not None:
             login(request, user, backend=AUTH_BACKEND)
-            return redirect('restaurants:cabinet')
+            return _post_login_redirect(user)
         messages.error(request, tr(request, 'err_bad_credentials'))
         return render(request, 'accounts/login.html', {'phone': phone})
     return render(request, 'accounts/login.html')

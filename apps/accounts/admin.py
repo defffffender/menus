@@ -2,8 +2,9 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
-from .models import PhoneOTP, User
+from .models import Lead, PhoneOTP, User
 
 
 class UserCreationForm(forms.ModelForm):
@@ -35,20 +36,20 @@ class UserChangeForm(forms.ModelForm):
     class Meta:
         model = User
         fields = (
-            'phone', 'full_name', 'plan', 'password', 'is_active', 'is_staff',
+            'phone', 'full_name', 'plan', 'is_agent', 'password', 'is_active', 'is_staff',
             'is_superuser', 'groups', 'user_permissions',
         )
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(BaseUserAdmin, UnfoldModelAdmin):
     add_form = UserCreationForm
     form = UserChangeForm
     model = User
 
-    list_display = ('phone', 'full_name', 'plan', 'is_staff', 'is_active')
-    list_filter = ('plan', 'is_staff', 'is_superuser', 'is_active')
-    list_editable = ('plan',)
+    list_display = ('phone', 'full_name', 'plan', 'is_agent', 'is_staff', 'is_active')
+    list_filter = ('is_agent', 'plan', 'is_staff', 'is_superuser', 'is_active')
+    list_editable = ('plan', 'is_agent')
     search_fields = ('phone', 'full_name')
     ordering = ('phone',)
     filter_horizontal = ('groups', 'user_permissions')
@@ -56,7 +57,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('phone', 'password')}),
         ('Личное', {'fields': ('full_name',)}),
-        ('Тариф', {'fields': ('plan',)}),
+        ('Роль и тариф', {'fields': ('is_agent', 'plan')}),
         ('Права', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Даты', {'fields': ('last_login', 'date_joined')}),
     )
@@ -68,8 +69,17 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
+@admin.register(Lead)
+class LeadAdmin(UnfoldModelAdmin):
+    list_display = ('venue_name', 'full_name', 'phone', 'city', 'is_processed', 'created_at')
+    list_filter = ('is_processed', 'created_at')
+    list_editable = ('is_processed',)
+    search_fields = ('venue_name', 'full_name', 'phone')
+    readonly_fields = ('created_at',)
+
+
 @admin.register(PhoneOTP)
-class PhoneOTPAdmin(admin.ModelAdmin):
+class PhoneOTPAdmin(UnfoldModelAdmin):
     list_display = ('phone', 'code', 'is_used', 'attempts', 'created_at')
     list_filter = ('is_used',)
     search_fields = ('phone',)

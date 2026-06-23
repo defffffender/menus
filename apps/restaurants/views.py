@@ -65,24 +65,36 @@ def _shell(request, restaurant, active):
         .select_related('restaurant')
         .filter(is_active=True)
     )
-    can_create = owns_any_venue(request.user)
     has_other = any(v.restaurant_id != restaurant.id for v in venues)
-    return {
+    perms = perms_of(membership)
+    ctx = {
         'restaurant': restaurant,
         'active': active,
         'membership': membership,
         'role_label': role_label,
-        'perms': perms_of(membership),
-        'can_create_venue': can_create,
+        'perms': perms,
+        # самостоятельно заводить заведения владельцы больше не могут — только агенты
+        'can_create_venue': False,
         # переключатель показываем только если есть куда переключиться
-        'can_switch_venue': has_other or can_create,
+        'can_switch_venue': has_other,
         'venues': venues,
     }
+    # счётчики для бейджей в сайдбаре (меню — блюд, заказы — активных)
+    if 'menu' in perms:
+        from apps.menu.models import Dish
+        ctx['nav_menu_count'] = Dish.objects.filter(category__restaurant=restaurant).count()
+    if 'orders' in perms:
+        from apps.orders.models import Order
+        ctx['nav_orders_count'] = restaurant.orders.filter(status__in=Order.FLOW).count()
+    return ctx
 
 
 @login_required
 def cabinet(request):
     """Список заведений пользователя. Если оно одно — сразу в дашборд."""
+    # агент управляет заведениями из своего агентского кабинета
+    if request.user.is_agent_user:
+        return redirect('accounts:agent_dashboard')
     memberships = (
         request.user.memberships
         .select_related('restaurant')
@@ -92,45 +104,17 @@ def cabinet(request):
         return redirect('restaurants:dashboard', slug=memberships[0].restaurant.slug)
     return render(request, 'restaurants/cabinet.html', {
         'memberships': memberships,
-        'can_create_venue': owns_any_venue(request.user),
+        'can_create_venue': False,
     })
 
 
 @login_required
 def venue_create(request):
-    """Добавить ещё одно заведение. Доступно ТОЛЬКО действующим владельцам:
-    первое заведение создаётся при регистрации, сотрудники владельцами не становятся."""
-    from .utils import unique_slug
-
-    if not owns_any_venue(request.user):
-        raise Http404
-
-    at_limit = not request.user.can_add_venue
-
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        rtype = request.POST.get('type', '').strip() or Restaurant.Type.RESTAURANT
-        city = request.POST.get('city', '').strip()
-        if at_limit:
-            messages.error(request, tr(request, 'plan_limit_venues'))
-        elif not name:
-            messages.error(request, tr(request, 'err_required'))
-        else:
-            restaurant = Restaurant.objects.create(
-                owner=request.user, name=name, slug=unique_slug(name),
-                type=rtype, city=city, phone=request.user.phone,
-            )
-            Membership.objects.create(
-                user=request.user, restaurant=restaurant, role=Membership.Role.OWNER,
-            )
-            messages.success(request, tr(request, 'venue_created'))
-            return redirect('restaurants:dashboard', slug=restaurant.slug)
-    return render(request, 'cabinet/venue_form.html', {
-        'venues': request.user.memberships.select_related('restaurant').filter(is_active=True),
-        'at_limit': at_limit,
-        'venue_limit': request.user.venue_limit,
-        'venues_used': request.user.venues_used,
-    })
+    """Создание заведений доступно только агентам — через агентский кабинет.
+    Владельцы заведения самостоятельно их не заводят."""
+    if request.user.is_agent_user:
+        return redirect('accounts:agent_register_venue')
+    raise Http404
 
 
 @login_required

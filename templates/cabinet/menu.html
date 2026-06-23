@@ -1,161 +1,194 @@
 {% extends 'cabinet/base.html' %}
 {% block heading %}{{ t.menu_title }}{% endblock %}
-{% block subheading %}{{ t.menu_subtitle }}{% endblock %}
+{% block subheading %}{{ dishes_count }} {{ t.menu_dishes_count }} · {{ categories_count }} {{ t.menu_cats_count }} · {{ available_count }} {{ t.menu_avail_count }}{% endblock %}
 {% block actions %}
-<div class="flex items-center gap-2" x-data>
-  <button @click="$dispatch('toggle-cat')"
-          class="text-sm font-semibold px-4 py-2.5 rounded-xl border border-line bg-white hover:border-brand">
-    + {{ t.menu_categories }}
-  </button>
+<div class="flex items-center gap-2.5" x-data>
+  <div class="hidden md:flex items-center gap-2 w-64 bg-sand border border-line rounded-xl px-3 py-2 focus-within:border-brand">
+    <svg class="w-4 h-4 text-ink/30 flex-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+    <input type="search" x-model="$store.search.q" placeholder="{{ t.menu_search_ph }}"
+           class="w-full bg-transparent text-sm focus:outline-none placeholder:text-ink/40">
+  </div>
   {% if categories %}
-  <a href="{% url 'menu:dish_add' restaurant.slug %}"
-     class="bg-brand text-white text-sm font-semibold px-4 py-2.5 rounded-xl">{{ t.menu_add_dish }}</a>
+  <button hx-get="{% url 'menu:dish_add' restaurant.slug %}" hx-target="#dish-drawer-body" hx-swap="innerHTML"
+          @click="$dispatch('open-drawer')"
+          class="inline-flex items-center gap-1.5 bg-brand text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-[0_4px_12px_rgba(199,91,57,.24)]">
+    <span class="text-lg leading-none">+</span>{{ t.menu_add_dish }}
+  </button>
   {% endif %}
 </div>
 {% endblock %}
-{% block content %}
-<div x-data="{ catOpen: false, editId: null, allNames: [{% for category in categories %}{% for dish in category.dishes.all %}'{{ dish.name_ru|add:" "|add:dish.name_uz|add:" "|add:dish.name_en|escapejs }}',{% endfor %}{% endfor %}] }"
-     @toggle-cat.window="catOpen = !catOpen">
 
-  <!-- add category -->
-  <div x-show="catOpen" x-cloak class="bg-white border border-line rounded-2xl p-5 mb-6">
-    <h2 class="font-semibold mb-3">{{ t.menu_add_category }}</h2>
-    <form method="post" action="{% url 'menu:category_add' restaurant.slug %}"
-          class="grid sm:grid-cols-4 gap-3 items-end">
-      {% csrf_token %}
-      <div>
-        <label class="block text-xs font-semibold text-ink/60 mb-1.5">RU</label>
-        <input name="name_ru" required placeholder="Горячие блюда"
-               class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-ink/60 mb-1.5">UZ</label>
-        <input name="name_uz" placeholder="Issiq taomlar"
-               class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-ink/60 mb-1.5">EN</label>
-        <input name="name_en" placeholder="Hot dishes"
-               class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand">
-      </div>
-      <button class="bg-brand text-white font-semibold rounded-xl py-2.5">{{ t.menu_save }}</button>
-    </form>
+{% block content %}
+<div x-data="{ cat:'all', catPanel:false, drawer:false, editId:null,
+               allNames: [{% for category in categories %}{% for dish in category.dishes.all %}'{{ dish.name_ru|add:" "|add:dish.name_uz|add:" "|add:dish.name_en|escapejs }}',{% endfor %}{% endfor %}] }"
+     @open-drawer.window="drawer = true" @close-drawer.window="drawer = false"
+     class="lg:flex lg:gap-6 lg:items-start">
+  <!-- LIST AREA -->
+  <div class="lg:flex-1 lg:min-w-0">
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3.5 mb-5">
+    <div class="bg-white border border-line rounded-2xl px-4 py-3.5">
+      <div class="text-xs text-ink/50">{{ t.mk_orders_today }}</div>
+      <div class="text-2xl font-bold mt-1 tabular-nums">{{ kpi.orders }}</div>
+    </div>
+    <div class="bg-white border border-line rounded-2xl px-4 py-3.5">
+      <div class="text-xs text-ink/50">{{ t.mk_revenue }}</div>
+      <div class="text-2xl font-bold mt-1 tabular-nums">{{ kpi.revenue }} <span class="text-xs text-ink/50 font-medium">{{ t.menu_som }}</span></div>
+    </div>
+    <div class="bg-white border border-line rounded-2xl px-4 py-3.5">
+      <div class="text-xs text-ink/50">{{ t.mk_avg }}</div>
+      <div class="text-2xl font-bold mt-1 tabular-nums">{{ kpi.avg }}</div>
+    </div>
+    <div class="bg-white border border-line rounded-2xl px-4 py-3.5">
+      <div class="text-xs text-ink/50">{{ t.mk_hit }}</div>
+      <div class="text-base font-bold mt-1.5 truncate">{% if kpi.top_name %}{{ kpi.top_name }} <span class="text-forest text-sm">· {{ kpi.top_qty }}</span>{% else %}<span class="text-ink/40 text-sm font-medium">{{ t.mk_no_hit }}</span>{% endif %}</div>
+    </div>
   </div>
 
   {% if categories %}
-    <!-- мгновенный поиск по блюдам (фильтрация на клиенте) -->
-    <div class="mb-5 relative max-w-md">
-      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
-      <input type="search" x-model="$store.search.q" placeholder="{{ t.menu_search_ph }}"
-             class="w-full border border-line rounded-xl pl-9 pr-9 py-2.5 bg-white focus:outline-none focus:border-brand">
-      <button type="button" x-show="$store.search.q" x-cloak @click="$store.search.q = ''"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-brand">✕</button>
-    </div>
-
-    <div class="space-y-7" data-sortable="{% url 'menu:category_reorder' restaurant.slug %}">
+  <!-- category tabs -->
+  <div class="flex gap-2 flex-wrap mb-4 items-center">
+    <button @click="cat='all'" :class="cat==='all' ? 'bg-night text-white' : 'bg-white border border-line text-ink/60 hover:border-brand'" class="px-3.5 py-2 rounded-xl text-sm font-semibold">{{ t.menu_all }} <span class="opacity-60">{{ dishes_count }}</span></button>
     {% for category in categories %}
-      <section data-id="{{ category.pk }}"
-               x-data="{ open: localStorage.getItem('cat_{{ category.pk }}') !== '0', names: [{% for dish in category.dishes.all %}'{{ dish.name_ru|add:" "|add:dish.name_uz|add:" "|add:dish.name_en|escapejs }}',{% endfor %}] }"
-               x-init="$watch('open', v => localStorage.setItem('cat_{{ category.pk }}', v ? '1' : '0'))"
-               x-show="$store.search.any(names)">
-        <!-- category header -->
-        <div class="flex items-center gap-3 mb-3 bg-clay/15 border border-clay/30 rounded-xl px-4 py-2.5">
-          <span class="drag-handle text-ink/30 hover:text-ink/60 flex-none" title="">⠿</span>
-          <button type="button" @click="open = !open" class="flex items-center gap-3 min-w-0 group"
-                  :title="open ? '{{ t.menu_collapse }}' : '{{ t.menu_expand }}'">
-            <span class="text-ink/40 text-xs transition-transform group-hover:text-brand" :class="!open && '-rotate-90'">▾</span>
-            <h2 class="font-display text-lg font-semibold truncate">{{ category.name_ru }}</h2>
-            <span class="text-xs font-semibold text-ink/50 bg-white/70 rounded-full px-2 py-0.5 tabular-nums">{{ category.dishes.all|length }}</span>
-          </button>
-          <div class="flex-1"></div>
-          <a href="{% url 'menu:dish_add' restaurant.slug %}?category={{ category.pk }}"
-             class="text-xs font-semibold text-brand hover:text-brand/70">+ {{ t.menu_add_dish_here }}</a>
-          <span class="text-line">·</span>
-          <button @click="editId = (editId === {{ category.pk }} ? null : {{ category.pk }})"
-                  class="text-xs font-semibold text-ink/60 hover:text-brand">{{ t.menu_edit }}</button>
-          <form method="post" action="{% url 'menu:category_delete' restaurant.slug category.pk %}"
-                onsubmit="return confirm('{{ t.cat_delete_confirm }}')">
+    <button @click="cat='{{ category.pk }}'" :class="cat==='{{ category.pk }}' ? 'bg-night text-white' : 'bg-white border border-line text-ink/60 hover:border-brand'" class="px-3.5 py-2 rounded-xl text-sm font-semibold">{{ category.name_ru }} <span class="opacity-50">{{ category.dishes.all|length }}</span></button>
+    {% endfor %}
+    <button @click="catPanel=!catPanel" :class="catPanel && 'border-brand text-brand'" class="ml-1 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-line text-ink/50 hover:border-brand">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
+      {{ t.menu_categories }}
+    </button>
+  </div>
+
+  <!-- category management panel -->
+  <div x-show="catPanel" x-cloak class="bg-white border border-line rounded-2xl p-5 mb-5"
+       x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+    <h2 class="font-semibold mb-3">{{ t.menu_add_category }}</h2>
+    <form method="post" action="{% url 'menu:category_add' restaurant.slug %}" class="grid sm:grid-cols-4 gap-3 items-end mb-5">
+      {% csrf_token %}
+      <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">RU</label>
+        <input name="name_ru" required placeholder="Горячие блюда" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+      <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">UZ</label>
+        <input name="name_uz" placeholder="Issiq taomlar" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+      <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">EN</label>
+        <input name="name_en" placeholder="Hot dishes" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+      <button class="bg-brand text-white font-semibold rounded-xl py-2.5">{{ t.menu_save }}</button>
+    </form>
+    <div class="divide-y divide-line border border-line rounded-xl" data-sortable="{% url 'menu:category_reorder' restaurant.slug %}">
+      {% for category in categories %}
+      <div data-id="{{ category.pk }}" class="p-3">
+        <div class="flex items-center gap-3">
+          <span class="drag-handle text-ink/30 flex-none">⠿</span>
+          <span class="font-semibold flex-1 min-w-0 truncate">{{ category.name_ru }}</span>
+          <span class="text-xs text-ink/40">{{ category.dishes.all|length }}</span>
+          <button type="button" @click="editId = (editId === {{ category.pk }} ? null : {{ category.pk }})" class="text-xs font-semibold text-ink/60 hover:text-brand">{{ t.menu_edit }}</button>
+          <form method="post" action="{% url 'menu:category_delete' restaurant.slug category.pk %}" onsubmit="return confirm('{{ t.cat_delete_confirm }}')">
             {% csrf_token %}
             <button class="text-xs font-semibold text-red-500 hover:text-red-700">{{ t.menu_delete }}</button>
           </form>
         </div>
-
-        <!-- inline category edit -->
-        <div x-show="editId === {{ category.pk }}" x-cloak class="bg-white border border-line rounded-2xl p-4 mb-3">
-          <form method="post" action="{% url 'menu:category_edit' restaurant.slug category.pk %}"
-                class="grid sm:grid-cols-4 gap-3 items-end">
+        <div x-show="editId === {{ category.pk }}" x-cloak class="mt-3">
+          <form method="post" action="{% url 'menu:category_edit' restaurant.slug category.pk %}" class="grid sm:grid-cols-4 gap-3 items-end">
             {% csrf_token %}
-            <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">RU</label>
-              <input name="name_ru" required value="{{ category.name_ru }}" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
-            <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">UZ</label>
-              <input name="name_uz" value="{{ category.name_uz }}" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
-            <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">EN</label>
-              <input name="name_en" value="{{ category.name_en }}" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
-            <button class="bg-brand text-white font-semibold rounded-xl py-2.5">{{ t.menu_save }}</button>
+            <div><label class="block text-[11px] font-semibold text-ink/60 mb-1">RU</label><input name="name_ru" required value="{{ category.name_ru }}" class="w-full border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand"></div>
+            <div><label class="block text-[11px] font-semibold text-ink/60 mb-1">UZ</label><input name="name_uz" value="{{ category.name_uz }}" class="w-full border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand"></div>
+            <div><label class="block text-[11px] font-semibold text-ink/60 mb-1">EN</label><input name="name_en" value="{{ category.name_en }}" class="w-full border border-line rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand"></div>
+            <button class="bg-brand text-white font-semibold rounded-lg py-2 text-sm">{{ t.menu_save }}</button>
           </form>
         </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 
-        <!-- dishes (раскрываем при активном поиске, даже если категория свёрнута) -->
-        <div x-show="open || $store.search.q" x-cloak
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-1"
-             x-transition:enter-end="opacity-100 translate-y-0">
-        {% if category.dishes.all %}
-        <div class="bg-white border border-line rounded-2xl divide-y divide-line"
-             data-sortable="{% url 'menu:dish_reorder' restaurant.slug %}">
-          {% for dish in category.dishes.all %}
-          <div class="flex items-center gap-4 p-4" data-id="{{ dish.pk }}"
-               x-show="$store.search.matches('{{ dish.name_ru|add:" "|add:dish.name_uz|add:" "|add:dish.name_en|escapejs }}')">
-            <span class="drag-handle text-ink/25 hover:text-ink/50 flex-none">⠿</span>
-            <img src="{{ dish.photo.url }}" alt="" loading="lazy" class="w-14 h-14 rounded-xl object-cover flex-none border border-line">
-            <div class="flex-1 min-w-0">
-              <div class="font-semibold truncate">{{ dish.name_ru }}</div>
-              <div class="text-xs text-ink/50 truncate">
-                {{ dish.name_uz|default:dish.name_en }}{% if dish.weight %} · {{ dish.weight }}{% endif %}
-              </div>
-            </div>
-            <div class="text-right flex-none">
-              <div class="font-semibold tabular-nums">
-                {% if dish.has_variants %}<span class="text-xs text-ink/40 font-normal">{{ t.menu_from }} </span>{% endif %}{{ dish.min_price }}
-                <span class="text-xs text-ink/40 font-normal">{{ t.menu_som }}</span>
-              </div>
-            </div>
-            <form method="post" action="{% url 'menu:dish_toggle' restaurant.slug dish.pk %}" class="flex-none">
-              {% csrf_token %}
-              <button class="text-[11px] font-semibold px-2.5 py-1 rounded-full {% if dish.is_available %}bg-forest/10 text-forest{% else %}bg-red-100 text-red-600{% endif %}">
-                {% if dish.is_available %}{{ t.menu_in_stock }}{% else %}{{ t.menu_stop }}{% endif %}
-              </button>
-            </form>
-            <a href="{% url 'menu:dish_edit' restaurant.slug dish.pk %}"
-               class="text-xs font-semibold text-ink/60 hover:text-brand flex-none">{{ t.menu_edit }}</a>
-            <form method="post" action="{% url 'menu:dish_delete' restaurant.slug dish.pk %}" class="flex-none"
-                  onsubmit="return confirm('{{ t.dish_delete_confirm }}')">
-              {% csrf_token %}
-              <button class="text-xs font-semibold text-red-500 hover:text-red-700">{{ t.menu_delete }}</button>
-            </form>
+  <!-- dish table -->
+  <div class="bg-white border border-line rounded-2xl overflow-x-auto">
+    <div class="min-w-[640px]">
+      <!-- header -->
+      <div class="grid grid-cols-[28px_52px_minmax(0,1fr)_120px_150px_36px] gap-4 items-center px-4 py-2.5 border-b border-line text-[11px] font-mono uppercase tracking-wide text-ink/50">
+        <span></span><span></span><span>{{ t.menu_th_dish }}</span><span>{{ t.menu_th_price }}</span><span>{{ t.menu_th_avail }}</span><span></span>
+      </div>
+      <!-- rows grouped per category (sortable within category), flat look -->
+      {% for category in categories %}
+      <div data-sortable="{% url 'menu:dish_reorder' restaurant.slug %}" x-show="cat==='all' || cat==='{{ category.pk }}'">
+        {% for dish in category.dishes.all %}
+        <div data-id="{{ dish.pk }}"
+             x-show="$store.search.matches('{{ dish.name_ru|add:" "|add:dish.name_uz|add:" "|add:dish.name_en|escapejs }}')"
+             class="grid grid-cols-[28px_52px_minmax(0,1fr)_120px_150px_36px] gap-4 items-center px-4 py-3 border-b border-[#F0E8DA] {% if not dish.is_available %}opacity-60{% endif %}">
+          <span class="drag-handle text-ink/25 hover:text-ink/50 flex-none text-center">⠿</span>
+          <img src="{{ dish.photo.url }}" alt="" loading="lazy" class="w-12 h-12 rounded-[10px] object-cover border border-line">
+          <button type="button" class="min-w-0 text-left"
+                  hx-get="{% url 'menu:dish_edit' restaurant.slug dish.pk %}" hx-target="#dish-drawer-body" hx-swap="innerHTML"
+                  @click="$dispatch('open-drawer')">
+            <div class="font-semibold truncate">{{ dish.name_ru }}</div>
+            <div class="text-xs text-ink/50 truncate">{{ dish.name_uz|default:dish.name_en }} · {{ category.name_ru }}</div>
+          </button>
+          <div class="font-bold tabular-nums">
+            {% if dish.has_variants %}<span class="text-xs text-ink/40 font-normal">{{ t.menu_from }} </span>{% endif %}{{ dish.min_price }}
+            <span class="text-[11px] text-ink/40 font-medium">{{ t.menu_som }}</span>
           </div>
-          {% endfor %}
+          {% include 'cabinet/_dish_toggle.html' %}
+          <div class="relative text-center" x-data="{ m:false }">
+            <button type="button" @click="m=!m" class="text-ink/40 hover:text-ink text-lg leading-none px-1">⋯</button>
+            <div x-show="m" x-cloak @click.outside="m=false"
+                 class="absolute right-0 mt-1 w-40 bg-white border border-line rounded-xl shadow-lg py-1 z-20 text-left">
+              <button type="button" class="block w-full text-left px-3.5 py-2 text-sm hover:bg-sand"
+                      hx-get="{% url 'menu:dish_edit' restaurant.slug dish.pk %}" hx-target="#dish-drawer-body" hx-swap="innerHTML"
+                      @click="m=false; $dispatch('open-drawer')">{{ t.menu_edit }}</button>
+              <form method="post" action="{% url 'menu:dish_delete' restaurant.slug dish.pk %}" onsubmit="return confirm('{{ t.dish_delete_confirm }}')">
+                {% csrf_token %}
+                <button class="block w-full text-left px-3.5 py-2 text-sm text-red-600 hover:bg-red-50">{{ t.menu_delete }}</button>
+              </form>
+            </div>
+          </div>
         </div>
-        {% else %}
-        <div class="text-sm text-ink/40 px-1">{{ t.menu_no_dishes }}</div>
-        {% endif %}
-        </div>
-      </section>
-    {% endfor %}
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
+  </div>
 
-    <!-- пусто по поиску -->
-    <div x-show="$store.search.q && !$store.search.any(allNames)" x-cloak
-         class="bg-white border border-line rounded-2xl p-12 text-center text-ink/50">
-      {{ t.menu_search_empty }} «<span class="font-semibold" x-text="$store.search.q"></span>»
-    </div>
+  <!-- search empty -->
+  <div x-show="$store.search.q && !$store.search.any(allNames)" x-cloak
+       class="bg-white border border-line rounded-2xl p-12 text-center text-ink/50 mt-4">
+    {{ t.menu_search_empty }} «<span class="font-semibold" x-text="$store.search.q"></span>»
+  </div>
+
   {% else %}
-    <div class="bg-white border border-line rounded-2xl p-12 text-center text-ink/50">{{ t.menu_empty }}</div>
+  <div class="bg-white border border-line rounded-2xl p-8 max-w-2xl mx-auto">
+    <div class="text-center text-ink/50 mb-6">{{ t.menu_empty }}</div>
+    <h2 class="font-semibold mb-3">{{ t.menu_add_category }}</h2>
+    <form method="post" action="{% url 'menu:category_add' restaurant.slug %}" class="grid sm:grid-cols-4 gap-3 items-end">
+      {% csrf_token %}
+      <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">RU</label>
+        <input name="name_ru" required placeholder="Горячие блюда" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+      <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">UZ</label>
+        <input name="name_uz" placeholder="Issiq taomlar" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+      <div><label class="block text-xs font-semibold text-ink/60 mb-1.5">EN</label>
+        <input name="name_en" placeholder="Hot dishes" class="w-full border border-line rounded-xl px-3 py-2.5 focus:outline-none focus:border-brand"></div>
+      <button class="bg-brand text-white font-semibold rounded-xl py-2.5">+ {{ t.menu_add_category }}</button>
+    </form>
+  </div>
   {% endif %}
+
+  </div><!-- /LIST AREA -->
+
+  <!-- EDIT DRAWER: встроенная колонка на десктопе, выезжающая панель на мобиле -->
+  <!-- мобильный backdrop -->
+  <div x-show="drawer" x-cloak @click="drawer=false"
+       x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+       class="fixed inset-0 bg-black/30 z-40 lg:hidden"></div>
+  <aside x-show="drawer" x-cloak @keydown.escape.window="drawer=false"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-full lg:translate-x-0 lg:opacity-0" x-transition:enter-end="translate-x-0 lg:opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0 lg:opacity-100" x-transition:leave-end="translate-x-full lg:opacity-0"
+         class="fixed lg:static inset-y-0 right-0 z-50 w-full max-w-[400px] lg:max-w-none lg:w-[380px] flex-none bg-[#FFFCF7] border-l border-line lg:border lg:rounded-2xl shadow-2xl lg:shadow-sm flex flex-col overflow-hidden mt-0 lg:sticky lg:top-0 lg:self-start lg:h-[calc(100vh-104px)]">
+    <div id="dish-drawer-body" class="flex flex-col h-full overflow-hidden">
+      <div class="flex-1 flex items-center justify-center text-ink/30 text-sm">…</div>
+    </div>
+  </aside>
 </div>
 
 <script>
-  // мгновенный поиск по меню — общий стор, доступен всем категориям/блюдам
   document.addEventListener('alpine:init', () => {
     Alpine.store('search', {
       q: '',

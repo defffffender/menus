@@ -17,6 +17,7 @@
     const m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
     if (m) e.detail.headers['X-CSRFToken'] = m.pop();
   });
+  // Alpine v3 сам инициализирует HTML, добавленный HTMX (через MutationObserver)
 </script>
 <script>
   tailwind.config = { theme: { extend: {
@@ -31,8 +32,8 @@
   body{-webkit-user-select:none;-moz-user-select:none;user-select:none}
   /* текстовый курсор и выделение — только в полях ввода */
   input[type=text],input[type=tel],input[type=number],input[type=email],input[type=password],input[type=search],textarea,[contenteditable]{cursor:text!important;-webkit-user-select:text;-moz-user-select:text;user-select:text}
-  /* в контентной области разрешаем выделять/копировать (телефоны, QR-токены, цены) */
-  main{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+  /* выделять/копировать можно только там, где явно разрешено (.selectable) */
+  .selectable{-webkit-user-select:text!important;-moz-user-select:text!important;user-select:text!important}
   /* ручка перетаскивания */
   .drag-handle{cursor:grab!important;-webkit-user-select:none;user-select:none}
   .sortable-chosen .drag-handle,.drag-handle:active{cursor:grabbing!important}
@@ -122,31 +123,63 @@
       {% endif %}
     </div>
 
-    {% with base='inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full' %}
+    {% with base='inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full' ic='w-[18px] h-[18px] flex-none' badge='ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full leading-none' %}
     <nav class="flex flex-col gap-0.5" @click="nav = false">
-      <a href="{% url 'restaurants:dashboard' restaurant.slug %}" class="{{ base }} {% if active == 'dashboard' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_dashboard }}</a>
+      <a href="{% url 'restaurants:dashboard' restaurant.slug %}" class="{{ base }} {% if active == 'dashboard' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        {{ t.nav_dashboard }}
+      </a>
       {% if 'menu' in perms %}
-      <a href="{% url 'menu:menu' restaurant.slug %}" class="{{ base }} {% if active == 'menu' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_menu }}</a>
+      <a href="{% url 'menu:menu' restaurant.slug %}" class="{{ base }} {% if active == 'menu' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="13" y2="17"/></svg>
+        {{ t.nav_menu }}
+        {% if nav_menu_count %}<span class="{{ badge }} bg-white/15">{{ nav_menu_count }}</span>{% endif %}
+      </a>
       {% endif %}
       {% if 'design' in perms %}
-      <a href="{% url 'restaurants:menu_design' restaurant.slug %}" class="{{ base }} {% if active == 'design' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_design }}</a>
+      <a href="{% url 'restaurants:menu_design' restaurant.slug %}" class="{{ base }} {% if active == 'design' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="9.5" cy="14.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+        {{ t.nav_design }}
+      </a>
       {% endif %}
       {% if 'orders' in perms %}
-      <a href="{% url 'orders:orders' restaurant.slug %}" class="{{ base }} {% if active == 'orders' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_orders }}</a>
-      <a href="{% url 'orders:history' restaurant.slug %}" class="{{ base }} {% if active == 'history' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_history }}</a>
+      <a href="{% url 'orders:orders' restaurant.slug %}" class="{{ base }} {% if active == 'orders' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="4" width="14" height="17" rx="2"/><line x1="8.5" y1="9" x2="15.5" y2="9"/><line x1="8.5" y1="13" x2="15.5" y2="13"/><line x1="8.5" y1="17" x2="12.5" y2="17"/></svg>
+        {{ t.nav_orders }}
+        {% if nav_orders_count %}<span class="{{ badge }} bg-brand text-white">{{ nav_orders_count }}</span>{% endif %}
+      </a>
+      <a href="{% url 'orders:history' restaurant.slug %}" class="{{ base }} {% if active == 'history' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        {{ t.nav_history }}
+      </a>
       {% endif %}
       {% if 'tables' in perms %}
-      <a href="{% url 'restaurants:tables' restaurant.slug %}" class="{{ base }} {% if active == 'tables' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_tables }}</a>
-      <a href="{% url 'restaurants:qr_sheet' restaurant.slug %}" class="{{ base }} {% if active == 'qr' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_qr }}</a>
+      <a href="{% url 'restaurants:tables' restaurant.slug %}" class="{{ base }} {% if active == 'tables' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.6"/></svg>
+        {{ t.nav_tables }}
+      </a>
+      <a href="{% url 'restaurants:qr_sheet' restaurant.slug %}" class="{{ base }} {% if active == 'qr' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="2.5" height="2.5"/><rect x="17.5" y="17.5" width="2.5" height="2.5"/></svg>
+        {{ t.nav_qr }}
+      </a>
       {% endif %}
       {% if 'staff' in perms %}
-      <a href="{% url 'restaurants:staff' restaurant.slug %}" class="{{ base }} {% if active == 'staff' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_staff }}</a>
+      <a href="{% url 'restaurants:staff' restaurant.slug %}" class="{{ base }} {% if active == 'staff' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c0-3 2.8-4.6 5.5-4.6s5.5 1.6 5.5 4.6"/><path d="M16 5.5a3 3 0 0 1 0 5.4"/><path d="M17 14.6c2 .5 3.5 1.8 3.5 4.4"/></svg>
+        {{ t.nav_staff }}
+      </a>
       {% endif %}
       {% if 'analytics' in perms %}
-      <a href="{% url 'restaurants:analytics' restaurant.slug %}" class="{{ base }} {% if active == 'analytics' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_analytics }}</a>
+      <a href="{% url 'restaurants:analytics' restaurant.slug %}" class="{{ base }} {% if active == 'analytics' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="20" x2="5" y2="13"/><line x1="12" y1="20" x2="12" y2="8"/><line x1="19" y1="20" x2="19" y2="15"/></svg>
+        {{ t.nav_analytics }}
+      </a>
       {% endif %}
       {% if 'settings' in perms %}
-      <a href="{% url 'restaurants:settings' restaurant.slug %}" class="{{ base }} {% if active == 'settings' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">{{ t.nav_settings }}</a>
+      <a href="{% url 'restaurants:settings' restaurant.slug %}" class="{{ base }} {% if active == 'settings' %}bg-brand text-white font-semibold{% else %}hover:bg-night2{% endif %}">
+        <svg class="{{ ic }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></svg>
+        {{ t.nav_settings }}
+      </a>
       {% endif %}
     </nav>
     {% endwith %}

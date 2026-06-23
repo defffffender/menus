@@ -43,6 +43,14 @@
 
   body[data-card="compact"] .t-photo{ display:none; }
 
+  /* крупные фото: снимок на всю карточку, текст и цена поверх снизу */
+  body[data-card="featured"] .t-list{ display:flex; flex-direction:column; gap:1rem; }
+  body[data-card="featured"] .t-dish{ position:relative; min-height:14rem; flex-direction:column; justify-content:flex-end; border:none!important; }
+  body[data-card="featured"] .t-photo{ position:absolute; inset:0; width:100%; height:100%; }
+  body[data-card="featured"] .t-body{ position:relative; z-index:1; width:100%; padding:2.75rem 1rem 1rem; color:#fff; background:linear-gradient(transparent,rgba(33,26,19,.88)); }
+  body[data-card="featured"] .t-body .t-desc{ color:#fff; opacity:.78; }
+  body[data-card="featured"] .t-accent-soft{ background:#fff; color:var(--t-accent); }
+
   body[data-desc="0"] .t-desc{ display:none; }
   body[data-logo="0"] .t-logo{ display:none; }
 
