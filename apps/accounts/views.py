@@ -41,27 +41,35 @@ def register(request):
     сохраняем лид, дальше менеджер/агент перезванивает и подключает заведение."""
     if request.user.is_authenticated:
         return _post_login_redirect(request.user)
-    values = {}
+    values = {'venue_type': Lead.VenueType.CHAIKHANA}
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()        # имя контакта
         venue = request.POST.get('venue', '').strip()       # название заведения
+        venue_type = request.POST.get('venue_type', '').strip()
         city = request.POST.get('city', '').strip()
         phone = request.POST.get('phone', '').strip()
-        comment = request.POST.get('comment', '').strip()
-        values = {'name': name, 'venue': venue, 'city': city, 'phone': phone, 'comment': comment}
+        agree = request.POST.get('agree')
+        if venue_type not in Lead.VenueType.values:
+            venue_type = ''
+        values = {'venue': venue, 'venue_type': venue_type or Lead.VenueType.CHAIKHANA,
+                  'city': city, 'phone': phone}
 
         if not phone:
             messages.error(request, tr(request, 'err_required'))
         elif not is_valid_uz_phone(phone):
             messages.error(request, tr(request, 'err_phone_uz'))
+        elif not agree:
+            messages.error(request, tr(request, 'err_agree'))
         else:
             Lead.objects.create(
-                full_name=name, venue_name=venue, city=city,
-                phone=normalize_phone(phone), comment=comment,
+                venue_name=venue, venue_type=venue_type, city=city,
+                phone=normalize_phone(phone),
             )
             messages.success(request, tr(request, 'lead_sent'))
             return redirect('accounts:login')
-    return render(request, 'accounts/register.html', {'values': values})
+    # порядок как в макете: чайхана, ресторан, кафе, фастфуд
+    order = ['chaikhana', 'restaurant', 'cafe', 'fastfood']
+    venue_types = [(v, tr(request, f'type_{v}')) for v in order]
+    return render(request, 'accounts/register.html', {'values': values, 'venue_types': venue_types})
 
 
 def login_view(request):

@@ -71,8 +71,8 @@ class UserAdmin(BaseUserAdmin, UnfoldModelAdmin):
 
 @admin.register(Lead)
 class LeadAdmin(UnfoldModelAdmin):
-    list_display = ('venue_name', 'full_name', 'phone', 'city', 'is_processed', 'created_at')
-    list_filter = ('is_processed', 'created_at')
+    list_display = ('venue_name', 'venue_type', 'phone', 'city', 'is_processed', 'created_at')
+    list_filter = ('is_processed', 'venue_type', 'created_at')
     list_editable = ('is_processed',)
     search_fields = ('venue_name', 'full_name', 'phone')
     readonly_fields = ('created_at',)

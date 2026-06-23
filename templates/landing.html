@@ -56,6 +56,14 @@
     .grid3{grid-template-columns:1fr!important;}
     .sec-h2{font-size:26px!important;}
   }
+  /* форма заявки */
+  .lf-input{width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;background:#fff;color:#2A2118;transition:border-color .15s;}
+  .lf-input:focus{border-color:#C75B39;}
+  .tchip{position:relative;display:inline-flex;}
+  .tchip input{position:absolute;opacity:0;width:0;height:0;}
+  .tchip span{display:inline-block;padding:9px 15px;border-radius:10px;background:#FBF6EE;border:1px solid #E3D6C2;color:#6B5E4F;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
+  .tchip input:checked+span{background:#C75B39;border-color:#C75B39;color:#fff;font-weight:600;}
+  .tchip input:focus-visible+span{box-shadow:0 0 0 3px rgba(199,91,57,.25);}
 </style>
 </head>
 <body>
@@ -112,7 +120,7 @@
           <div style="width:1px;background:#ECE3D5;"></div>
           <div><div style="font-family:'Spectral',serif;font-size:28px;font-weight:600;">{{ t.l_stat_langs_num }}</div><div style="font-size:13px;color:#9A8C78;margin-top:2px;">RU · UZ · EN</div></div>
           <div style="width:1px;background:#ECE3D5;"></div>
-          <div><div style="font-family:'Spectral',serif;font-size:28px;font-weight:600;">0 so‘m</div><div style="font-size:13px;color:#9A8C78;margin-top:2px;">{{ t.l_stat_start }}</div></div>
+          <div><div style="font-family:'Spectral',serif;font-size:28px;font-weight:600;">{{ t.l_stat_start_num }}</div><div style="font-size:13px;color:#9A8C78;margin-top:2px;">{{ t.l_stat_start }}</div></div>
         </div>
       </div>
 
@@ -306,43 +314,42 @@
 
       <!-- form card -->
       <div style="background:#fff;border:1px solid #ECE3D5;border-radius:22px;padding:34px;box-shadow:0 24px 56px rgba(42,33,24,.14);">
-        <div style="margin-bottom:20px;">
-          <div style="font-family:'Spectral',serif;font-size:22px;font-weight:600;">{{ t.lead_title }}</div>
-          <div style="font-size:13px;color:#9A8C78;line-height:1.45;margin-top:5px;">{{ t.lead_subtitle }}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+          <div style="font-family:'Spectral',serif;font-size:22px;font-weight:600;">{{ t.reg_title }}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9A8C78;">{{ t.l_reg_step }}</div>
         </div>
 
         <form method="post" action="{% url 'accounts:register' %}" style="display:flex;flex-direction:column;gap:15px;">
           {% csrf_token %}
           <div>
-            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.lead_name }}</div>
-            <input name="name" value="{{ values.name }}"
-                   style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
+            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_name }}</div>
+            <input name="venue" value="{{ values.venue }}" placeholder="Navbahor" class="lf-input">
           </div>
           <div>
-            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.lead_venue }}</div>
-            <input name="venue" value="{{ values.venue }}"
-                   style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
+            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_type }}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <label class="tchip"><input type="radio" name="venue_type" value="chaikhana" {% if values.venue_type == 'chaikhana' %}checked{% endif %}><span>{{ t.type_chaikhana }}</span></label>
+              <label class="tchip"><input type="radio" name="venue_type" value="restaurant" {% if values.venue_type == 'restaurant' %}checked{% endif %}><span>{{ t.type_restaurant }}</span></label>
+              <label class="tchip"><input type="radio" name="venue_type" value="cafe" {% if values.venue_type == 'cafe' %}checked{% endif %}><span>{{ t.type_cafe }}</span></label>
+              <label class="tchip"><input type="radio" name="venue_type" value="fastfood" {% if values.venue_type == 'fastfood' %}checked{% endif %}><span>{{ t.type_fastfood }}</span></label>
+            </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
               <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_city }}</div>
-              <input name="city" value="{{ values.city }}" placeholder="{{ t.l_reg_city_ph }}"
-                     style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
+              <input name="city" value="{{ values.city }}" placeholder="{{ t.l_reg_city_ph }}" class="lf-input">
             </div>
             <div>
               <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.reg_phone }}</div>
-              <input name="phone" required data-phone-mask inputmode="tel" maxlength="19" value="{{ values.phone }}"
-                     placeholder="+998 90 123-45-67"
-                     style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;">
+              <input name="phone" required data-phone-mask inputmode="tel" maxlength="19" value="{{ values.phone }}" placeholder="+998 90 123-45-67" class="lf-input">
             </div>
           </div>
-          <div>
-            <div style="font-size:12.5px;font-weight:600;color:#6B5E4F;margin-bottom:7px;">{{ t.lead_comment }}</div>
-            <textarea name="comment" rows="2"
-                      style="width:100%;border:1px solid #DCD0BD;border-radius:12px;padding:13px 15px;font-size:14px;outline:none;resize:vertical;">{{ values.comment }}</textarea>
-          </div>
+          <label style="display:flex;align-items:flex-start;gap:10px;margin-top:2px;cursor:pointer;">
+            <input type="checkbox" name="agree" value="1" checked required style="width:18px;height:18px;margin-top:1px;accent-color:#C75B39;flex:none;cursor:pointer;">
+            <span style="font-size:12.5px;color:#9A8C78;line-height:1.45;">{{ t.l_reg_agree }}</span>
+          </label>
           <button type="submit" class="btn"
-                  style="margin-top:6px;padding:15px;border-radius:13px;background:#C75B39;color:#fff;font-size:16px;font-weight:600;border:none;cursor:pointer;box-shadow:0 8px 20px rgba(199,91,57,.26);">{{ t.lead_submit }}</button>
+                  style="margin-top:6px;padding:15px;border-radius:13px;background:#C75B39;color:#fff;font-size:16px;font-weight:600;border:none;cursor:pointer;box-shadow:0 8px 20px rgba(199,91,57,.26);">{{ t.l_reg_submit }}</button>
           <div style="text-align:center;font-size:13px;color:#9A8C78;">{{ t.reg_have_account }} <a href="/login/" style="color:#C75B39;font-weight:600;">{{ t.nav_login }}</a></div>
         </form>
       </div>

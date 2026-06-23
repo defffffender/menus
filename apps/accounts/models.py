@@ -115,9 +115,16 @@ class Lead(models.Model):
     """Заявка с лендинга «Оставить заявку» (самостоятельной регистрации нет).
     Менеджер/агент перезванивает и подключает заведение вручную."""
 
+    class VenueType(models.TextChoices):
+        RESTAURANT = 'restaurant', 'Ресторан'
+        CAFE = 'cafe', 'Кафе'
+        CHAIKHANA = 'chaikhana', 'Чайхана'
+        FASTFOOD = 'fastfood', 'Фастфуд'
+
     full_name = models.CharField('Имя', max_length=150, blank=True)
     phone = models.CharField('Телефон', max_length=20)
     venue_name = models.CharField('Заведение', max_length=150, blank=True)
+    venue_type = models.CharField('Тип заведения', max_length=20, choices=VenueType.choices, blank=True)
     city = models.CharField('Город', max_length=80, blank=True)
     comment = models.TextField('Комментарий', blank=True)
     is_processed = models.BooleanField('Обработана', default=False)

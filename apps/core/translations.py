@@ -423,6 +423,7 @@ TR = {
     'msg_code_sent':    {'ru': 'Код отправлен', 'uz': 'Kod yuborildi', 'en': 'Code sent'},
     'err_otp_throttled': {'ru': 'Код уже отправлен. Если не пришёл — подождите минуту и попробуйте снова.', 'uz': 'Kod allaqachon yuborilgan. Kelmasa — bir daqiqa kuting va qayta urinib koʻring.', 'en': 'A code was already sent. If it didn’t arrive, wait a minute and try again.'},
     'err_required':     {'ru': 'Заполните название и телефон', 'uz': 'Nom va telefonni toʻldiring', 'en': 'Fill in name and phone'},
+    'err_agree':        {'ru': 'Подтвердите согласие с условиями', 'uz': 'Shartlarga roziligingizni tasdiqlang', 'en': 'Please accept the terms'},
     'err_phone_uz':     {'ru': 'Введите номер в формате +998 XX XXX-XX-XX', 'uz': 'Raqamni +998 XX XXX-XX-XX koʻrinishida kiriting', 'en': 'Enter the number as +998 XX XXX-XX-XX'},
     'err_invalid_code': {'ru': 'Неверный код', 'uz': 'Notoʻgʻri kod', 'en': 'Invalid code'},
     'err_attempts_left': {'ru': 'осталось попыток', 'uz': 'urinish qoldi', 'en': 'attempts left'},
@@ -448,7 +449,8 @@ TR = {
     'l_hero_cta2':      {'ru': 'Смотреть демо', 'uz': 'Demoni koʻrish', 'en': 'Watch demo'},
     'l_stat_venues':    {'ru': 'заведений', 'uz': 'dan ortiq muassasa', 'en': 'venues'},
     'l_stat_langs_num': {'ru': '3 языка', 'uz': '3 xil til', 'en': '3 languages'},
-    'l_stat_start':     {'ru': 'старт', 'uz': 'boshlash', 'en': 'to start'},
+    'l_stat_start_num': {'ru': '5 минут', 'uz': '5 daqiqa', 'en': '5 min'},
+    'l_stat_start':     {'ru': 'запуск', 'uz': 'ishga tushirish', 'en': 'to launch'},
 
     # phone mock
     'l_mock_popular':   {'ru': 'Популярное', 'uz': 'Ommabop', 'en': 'Popular'},
