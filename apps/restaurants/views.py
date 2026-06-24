@@ -650,9 +650,10 @@ def guest_menu(request, qr_token):
         return render(request, 'public/menu_unavailable.html', {'restaurant': restaurant}, status=402)
     lang = resolve_lang(request)
     # просмотр меню = «сканирование»: открываем визит, если стол сейчас закрыт.
-    # Сам заказ сессию НЕ открывает — поэтому после «Закрыть стол» забытая
-    # вкладка уже не сможет дозаказывать (нужно заново открыть страницу).
-    if not table.session_is_open:
+    # НО если официант только что закрыл стол (идёт кулдаун) — не переоткрываем:
+    # это защита от «заказа из дома», когда ушедший гость перезагружает страницу.
+    # Для новой компании официант открывает стол вручную кнопкой на доске.
+    if not table.session_is_open and not table.reopen_blocked:
         table.open_session()
     return render(request, 'public/menu.html', {
         'table': table,

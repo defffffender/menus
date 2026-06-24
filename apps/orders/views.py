@@ -187,11 +187,44 @@ def close_table(request, slug, table_pk):
                   _board_context(restaurant, resolve_lang(request), request.membership))
 
 
+@login_required
+@require_POST
+def open_table(request, slug, table_pk):
+    """Официант вручную открывает стол — для новой компании сразу после оплаты
+    предыдущей, пока ещё действует кулдаун переоткрытия (скан в это окно стол не
+    открывает, чтобы ушедший гость не дозаказывал из дома)."""
+    restaurant = _get_restaurant(request, slug, perm='orders')
+    table = get_object_or_404(Table, pk=table_pk, restaurant=restaurant)
+    from apps.restaurants.models import Membership
+    waiter_ids = set(table.waiters.values_list('id', flat=True))
+    is_waiter = request.membership and request.membership.role == Membership.Role.WAITER
+    if is_waiter and waiter_ids and request.membership.user_id not in waiter_ids:
+        pass  # чужой стол — молча игнорируем
+    else:
+        table.open_session()
+    return render(request, 'cabinet/_orders_board.html',
+                  _board_context(restaurant, resolve_lang(request), request.membership))
+
+
 def _open_tables(restaurant, membership):
     """Столы с активным визитом (для строки «Открытые столы» на доске)."""
     from apps.restaurants.models import Membership, TABLE_SESSION_TTL
     fresh = timezone.now() - TABLE_SESSION_TTL
     qs = restaurant.tables.filter(session_opened_at__gte=fresh)
+    if membership and membership.role == Membership.Role.WAITER:
+        from django.db.models import Q
+        qs = qs.filter(
+            Q(waiters=membership.user_id) | Q(waiters__isnull=True)
+        ).distinct()
+    return qs.order_by('sort_order', 'id')
+
+
+def _closed_tables(restaurant, membership):
+    """Недавно закрытые столы (в окне кулдауна) — их можно открыть вручную для
+    новой компании. Скан в это окно стол не переоткрывает."""
+    from apps.restaurants.models import Membership, TABLE_REOPEN_COOLDOWN
+    cutoff = timezone.now() - TABLE_REOPEN_COOLDOWN
+    qs = restaurant.tables.filter(session_opened_at__isnull=True, session_closed_at__gte=cutoff)
     if membership and membership.role == Membership.Role.WAITER:
         from django.db.models import Q
         qs = qs.filter(
@@ -335,4 +368,5 @@ def _board_context(restaurant, lang, membership=None):
         'total_active': total_active,
         'closed_today': closed_today,
         'open_tables': _open_tables(restaurant, membership),
+        'closed_tables': _closed_tables(restaurant, membership),
     }

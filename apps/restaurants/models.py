@@ -9,6 +9,12 @@ from django.utils import timezone
 # её после оплаты; плюс автозакрытие по простою, чтобы забытый стол не «висел».
 TABLE_SESSION_TTL = timedelta(hours=4)
 
+# После того как официант закрыл стол, скан меню НЕ переоткрывает визит в течение
+# этого окна. Защита от «заказа из дома»: ушедший гость с открытой/сохранённой
+# ссылкой не сможет дозаказывать, просто перезагрузив страницу. Для быстрой смены
+# гостей официант открывает стол вручную кнопкой на доске.
+TABLE_REOPEN_COOLDOWN = timedelta(minutes=30)
+
 
 def gen_qr_token():
     return uuid.uuid4().hex
@@ -269,6 +275,8 @@ class Table(models.Model):
     created_at = models.DateTimeField('Создан', auto_now_add=True)
     # Начало текущего визита; None — стол закрыт (заказы не принимаются).
     session_opened_at = models.DateTimeField('Сессия открыта', null=True, blank=True)
+    # Когда официант закрыл стол. Нужно для кулдауна переоткрытия (анти-абуз).
+    session_closed_at = models.DateTimeField('Сессия закрыта', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Стол'
@@ -285,10 +293,21 @@ class Table(models.Model):
             return False
         return timezone.now() - self.session_opened_at < TABLE_SESSION_TTL
 
+    @property
+    def reopen_blocked(self):
+        """Стол недавно закрыт официантом → скан не переоткрывает визит (анти-абуз
+        «заказ из дома»). Окно — TABLE_REOPEN_COOLDOWN; после него скан снова
+        открывает стол обычным гостям."""
+        if self.session_closed_at is None:
+            return False
+        return timezone.now() - self.session_closed_at < TABLE_REOPEN_COOLDOWN
+
     def open_session(self):
-        """Открыть сессию визита (вызывается при просмотре меню = «сканировании»)."""
+        """Открыть сессию визита (скан меню гостем или ручное открытие официантом).
+        Снимает метку закрытия — кулдаун переоткрытия больше не действует."""
         self.session_opened_at = timezone.now()
-        self.save(update_fields=['session_opened_at'])
+        self.session_closed_at = None
+        self.save(update_fields=['session_opened_at', 'session_closed_at'])
 
     def touch_session(self):
         """Продлить активную сессию (успешный заказ = активность за столом)."""
@@ -296,6 +315,8 @@ class Table(models.Model):
         self.save(update_fields=['session_opened_at'])
 
     def close_session(self):
-        """Закрыть стол: новые заказы больше не принимаются до нового визита."""
+        """Закрыть стол: новые заказы больше не принимаются до нового визита.
+        Фиксируем время закрытия — включается кулдаун переоткрытия."""
         self.session_opened_at = None
-        self.save(update_fields=['session_opened_at'])
+        self.session_closed_at = timezone.now()
+        self.save(update_fields=['session_opened_at', 'session_closed_at'])

@@ -26,6 +26,23 @@
 </div>
 {% endif %}
 
+{% if closed_tables %}
+<div class="mb-5">
+  <div class="text-xs font-semibold uppercase tracking-wide text-ink/40 mb-2">{{ t.ord_closed_tables }}</div>
+  <div class="flex flex-wrap gap-2">
+    {% for tbl in closed_tables %}
+    <span class="inline-flex items-center gap-1.5 bg-white border border-line rounded-full pl-3 pr-1 py-1 text-sm text-ink/45">
+      <span class="w-1.5 h-1.5 rounded-full bg-ink/20"></span>{{ tbl.name }}
+      <button hx-post="{% url 'orders:open_table' restaurant.slug tbl.pk %}"
+              hx-target="#board" hx-swap="innerHTML"
+              title="{{ t.ord_open_table }}"
+              class="inline-flex items-center gap-1 h-6 px-2.5 rounded-full text-forest hover:bg-forest/10 font-semibold text-xs">↻ {{ t.ord_open_table }}</button>
+    </span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 {% if total_active %}
 <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
   {% for col in columns %}

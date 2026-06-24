@@ -334,7 +334,9 @@ TR = {
     'ord_closed_today': {'ru': 'закрыто сегодня', 'uz': 'bugun yopildi', 'en': 'closed today'},
     'ord_open_tables':  {'ru': 'Открытые столы', 'uz': 'Ochiq stollar', 'en': 'Open tables'},
     'ord_close_table':  {'ru': 'Закрыть стол', 'uz': 'Stolni yopish', 'en': 'Close table'},
-    'ord_close_table_confirm': {'ru': 'Закрыть стол? Новые заказы по нему приниматься не будут, пока гость снова не откроет меню.', 'uz': 'Stol yopilsinmi? Mehmon menyuni qayta ochmaguncha yangi buyurtmalar qabul qilinmaydi.', 'en': 'Close this table? New orders won’t be accepted until a guest reopens the menu.'},
+    'ord_close_table_confirm': {'ru': 'Закрыть стол? Новые заказы по нему приниматься не будут. Для новой компании откройте стол кнопкой «Открыть».', 'uz': 'Stol yopilsinmi? Yangi buyurtmalar qabul qilinmaydi. Yangi mehmonlar uchun «Ochish» tugmasini bosing.', 'en': 'Close this table? New orders won’t be accepted. For new guests, reopen it with the “Open” button.'},
+    'ord_closed_tables': {'ru': 'Недавно закрытые', 'uz': 'Yaqinda yopilgan', 'en': 'Recently closed'},
+    'ord_open_table':   {'ru': 'Открыть', 'uz': 'Ochish', 'en': 'Open'},
     'ord_empty_col':    {'ru': 'Пусто', 'uz': 'Boʻsh', 'en': 'Empty'},
     'ord_no_active':    {'ru': 'Пока нет активных заказов', 'uz': 'Hozircha faol buyurtmalar yoʻq', 'en': 'No active orders yet'},
     'ord_table':        {'ru': 'Стол', 'uz': 'Stol', 'en': 'Table'},
@@ -440,6 +442,8 @@ TR = {
     'err_no_user':      {'ru': 'Заведение с таким номером не найдено', 'uz': 'Bu raqam topilmadi', 'en': 'No account with this number'},
     'err_pw_mismatch':  {'ru': 'Пароли не совпадают', 'uz': 'Parollar mos kelmadi', 'en': 'Passwords do not match'},
     'err_bad_credentials': {'ru': 'Неверный телефон или пароль', 'uz': 'Notoʻgʻri telefon yoki parol', 'en': 'Wrong phone or password'},
+    'err_locked_title': {'ru': 'Слишком много попыток входа', 'uz': 'Kirishga urinishlar juda koʻp', 'en': 'Too many login attempts'},
+    'err_locked_text': {'ru': 'Вход временно заблокирован из соображений безопасности. Попробуйте снова через 30 минут или восстановите пароль.', 'uz': 'Xavfsizlik uchun kirish vaqtincha bloklandi. 30 daqiqadan soʻng qayta urinib koʻring yoki parolni tiklang.', 'en': 'Sign-in is temporarily blocked for security. Try again in 30 minutes or reset your password.'},
     'reg_exists':       {'ru': 'Этот номер уже зарегистрирован. Войдите, а новое заведение добавьте в кабинете.', 'uz': 'Bu raqam allaqachon roʻyxatda. Kiring va yangi muassasani kabinetda qoʻshing.', 'en': 'This number is already registered. Log in and add a new venue from the dashboard.'},
 
     # ===== Лендинг (главная) =====

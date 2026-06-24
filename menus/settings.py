@@ -1,4 +1,5 @@
 
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -53,6 +54,9 @@ INSTALLED_APPS = [
     # realtime
     'channels',
 
+    # защита логина/админки от перебора пароля
+    'axes',
+
     # local apps
     'apps.core',
     'apps.accounts',
@@ -106,6 +110,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.restaurants.middleware.SubscriptionMiddleware',
+    # должен идти последним: ловит блокировку перебора и отдаёт ответ-локаут
+    'axes.middleware.AxesMiddleware',
+]
+
+# Бэкенды аутентификации: Axes идёт первым — на залоченной паре IP+логин он
+# прерывает вход (PermissionDenied), иначе пропускает к обычному ModelBackend.
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 ROOT_URLCONF = 'menus.urls'
@@ -220,6 +233,43 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    # За nginx реальный IP клиента — в X-Forwarded-For (1 прокси). Нужно axes,
+    # чтобы лочить настоящий IP, а не адрес nginx.
+    AXES_IPWARE_PROXY_COUNT = 1
+    AXES_IPWARE_META_PRECEDENCE_ORDER = ['HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR']
+
+
+# --- Кэш --------------------------------------------------------------------
+# На проде — Redis (общий для всех воркеров Daphne); в dev — локальная память.
+if env('REDIS_URL'):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': env('REDIS_URL'),
+        },
+    }
+
+
+# --- Защита от перебора пароля (django-axes) --------------------------------
+# 5 неудачных попыток на пару «IP + телефон» → локаут на 30 минут. Лочим именно
+# пару, а не только логин, чтобы атакующий не мог заблокировать чужой аккаунт.
+# Хендлер — БД (таблица попыток общая для всех воркеров, состояние не теряется).
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=30)
+AXES_LOCKOUT_PARAMETERS = [['ip_address', 'username']]
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_TEMPLATE = 'accounts/lockout.html'
+
+
+# Логин в кабинет шлёт поле 'phone', админка — 'username'. Берём из переданных
+# в authenticate() реквизитов, иначе из POST любого из полей.
+def axes_username(request, credentials):
+    if credentials and credentials.get('username'):
+        return credentials['username']
+    return (request.POST.get('phone') or request.POST.get('username') or '').strip() or None
+
+
+AXES_USERNAME_CALLABLE = axes_username
 
 
 # --- Логирование ------------------------------------------------------------
