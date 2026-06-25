@@ -233,10 +233,12 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    # За nginx реальный IP клиента — в X-Forwarded-For (1 прокси). Нужно axes,
-    # чтобы лочить настоящий IP, а не адрес nginx.
-    AXES_IPWARE_PROXY_COUNT = 1
-    AXES_IPWARE_META_PRECEDENCE_ORDER = ['HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR']
+    # Реальный IP клиента — из X-Real-IP (nginx ставит его в $remote_addr).
+    # Блокировка идёт по логину, а IP нужен axes только для журнала попыток в
+    # админке. НЕ ставим AXES_IPWARE_PROXY_COUNT: при одном nginx цепочка XFF
+    # содержит лишь IP клиента, и proxy_count>0 ломает определение (всё схлопывается
+    # в адрес nginx 127.0.0.1).
+    AXES_IPWARE_META_PRECEDENCE_ORDER = ['HTTP_X_REAL_IP', 'REMOTE_ADDR']
 
 
 # --- Кэш --------------------------------------------------------------------
@@ -251,12 +253,15 @@ if env('REDIS_URL'):
 
 
 # --- Защита от перебора пароля (django-axes) --------------------------------
-# 5 неудачных попыток на пару «IP + телефон» → локаут на 30 минут. Лочим именно
-# пару, а не только логин, чтобы атакующий не мог заблокировать чужой аккаунт.
+# 5 неудачных попыток по логину (телефону) → локаут на 30 минут. Лочим именно по
+# логину, а не по паре IP+логин: мобильные клиенты в UZ часто меняют IP, и связку
+# IP+логин атакующий обходит сменой IP. По телефону блокировка предсказуема и не
+# обходится («5 промахов по этому номеру → вход с него закрыт на 30 минут»).
+# Заблокированный по ошибке владелец может зайти через восстановление пароля по SMS.
 # Хендлер — БД (таблица попыток общая для всех воркеров, состояние не теряется).
 AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = timedelta(minutes=30)
-AXES_LOCKOUT_PARAMETERS = [['ip_address', 'username']]
+AXES_LOCKOUT_PARAMETERS = ['username']
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_TEMPLATE = 'accounts/lockout.html'
 
