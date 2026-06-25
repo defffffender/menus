@@ -233,12 +233,6 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    # Реальный IP клиента — из X-Real-IP (nginx ставит его в $remote_addr).
-    # Блокировка идёт по логину, а IP нужен axes только для журнала попыток в
-    # админке. НЕ ставим AXES_IPWARE_PROXY_COUNT: при одном nginx цепочка XFF
-    # содержит лишь IP клиента, и proxy_count>0 ломает определение (всё схлопывается
-    # в адрес nginx 127.0.0.1).
-    AXES_IPWARE_META_PRECEDENCE_ORDER = ['HTTP_X_REAL_IP', 'REMOTE_ADDR']
 
 
 # --- Кэш --------------------------------------------------------------------
@@ -275,6 +269,15 @@ def axes_username(request, credentials):
 
 
 AXES_USERNAME_CALLABLE = axes_username
+
+
+# IP клиента для журнала попыток. За nginx реальный адрес лежит в X-Real-IP
+# ($remote_addr — клиент не может его подделать); в dev/прямом доступе — REMOTE_ADDR.
+def axes_client_ip(request):
+    return request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR')
+
+
+AXES_CLIENT_IP_CALLABLE = axes_client_ip
 
 
 # --- Логирование ------------------------------------------------------------
